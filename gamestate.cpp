@@ -133,4 +133,17 @@ using namespace std;
 					 height[i][j] -= stack_size;
 		}
 	}
+
+
+	void gamestate::undo_move(string move, int player)
+	{
+		
+	}
+
+	bool gamestate::over()
+	{
+		return false;
+	}
+
+
 // };

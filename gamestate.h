@@ -17,4 +17,6 @@ class gamestate
 	int otherFlatstones, otherCapstones;
 	gamestate(int, int, int);
 	void update_board(std::string, int);
+	void undo_move(std::string, int);
+	bool over();
 };
