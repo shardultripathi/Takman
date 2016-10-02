@@ -21,6 +21,8 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 	if (game->over())
 		return make_pair(maxNode?neg:pos,"");
 
+	bool localW2F;
+
 	if (maxNode)
 	{
 		int max = neg;
@@ -31,12 +33,14 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 		for (int i=0; i<moves_size; i++)
 		{
 			game->update_board(moves[i],game->player_id);
+			localW2F = game->wallToFlat;
 			temp = value(game,cutoff,depth+1,alpha,beta,false).first;
 			if (temp>max)
 			{
 				max = temp;
 				max_index = i;
 			}
+			game->wallToFlat = localW2F;
 			game->undo_move(moves[i],game->player_id);
 			if (max >= beta)
 				return make_pair(max,moves[i]);
@@ -54,12 +58,14 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 		for (int i=0; i<moves_size; i++)
 		{
 			game->update_board(moves[i],game->other_player);
+			localW2F = game->wallToFlat;
 			temp = value(game,cutoff,depth+1,alpha,beta,true).first;
 			if (temp<min)
 			{
 				min = temp;
 				min_index = i;
 			}
+			game->wallToFlat = localW2F;
 			game->undo_move(moves[i],game->other_player);
 			if (min <= alpha) 
 				return make_pair(min,moves[i]);

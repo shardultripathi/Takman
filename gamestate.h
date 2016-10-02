@@ -12,6 +12,7 @@ class gamestate
 	int other_player;
 	int*** board;
 	int** height;
+	bool wallToFlat;
 
 	int myFlatstones, myCapstones;
 	int otherFlatstones, otherCapstones;
