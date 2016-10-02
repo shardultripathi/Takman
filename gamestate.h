@@ -9,6 +9,7 @@ class gamestate
 	int n;
 	int tl;
 	int player_id;
+	int other_player;
 	int*** board;
 	int** height;
 

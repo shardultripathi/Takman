@@ -24,6 +24,7 @@ using namespace std;
 		n = N;
 		tl = time;
 		player_id = player;
+		other_player = (player==1)?2:1;
 
 		myFlatstones = otherFlatstones = 20; /////// do wrt n finally
 		myCapstones = otherCapstones = 1;
