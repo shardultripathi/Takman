@@ -17,9 +17,9 @@ int flatwin(gamestate* game)
 	for (int i=0; i<n; i++)
 		for (int j=0; j<n; j++)
 		{
-			if (game->board[i][j][game->height[i][j]-1]==1)
+			if (game->board[i][j][game->height[i][j]-1]==1||game->board[i][j][game->height[i][j]-1]==3)
 				myflats++;
-			if (game->board[i][j][game->height[i][j]-1]==-1)
+			if (game->board[i][j][game->height[i][j]-1]==-1||game->board[i][j][game->height[i][j]-1]==-3)
 				otherflats++;
 		}
 	return (myflats-otherflats)*pos/(myflats+otherflats);
@@ -218,20 +218,23 @@ int min_val(int a, int b)
 
 pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int beta, bool maxNode)
 {
-	if (cutoff==depth)
-		return make_pair(eval(game,maxNode?(game->other_player):(game->player_id)),""); //// if it is maxnode =>
-																						//// came from a move of minnode => evaluate wrt to other player
-	if (game->over()==1) ////// I won by road
+	int game_over = game->over();
+
+	if (game_over==1) ////// I won by road
 		return make_pair(pos,"");
 
-	if (game->over()==-1) ////// Opp won by road
+	if (game_over==-1) ////// Opp won by road
 		return make_pair(neg,"");
 
-	if (game->over()==2) ////// Someone ran out of tiles
+	if (game_over==2) ////// Someone ran out of tiles
 		return make_pair(flatwin(game),"");
 
-	if (game->over()==3) /////// Board full
+	if (game_over==3) /////// Board full
 		return make_pair(flatwin(game),"");
+
+	if (cutoff==depth)
+		return make_pair(eval(game,maxNode?(game->other_player):(game->player_id)),""); //// if it is maxnode =>
+																						//// came from a move of minnode => evaluate wrt to other player	
 
 	bool localW2F;
 

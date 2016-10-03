@@ -131,7 +131,7 @@ void generate_moves(vector<string> &moves, gamestate* game, int player)
 	int i,j,k,max_stack_move;
 	string str,str1;
 	char c;
-	int sign = (player==game->player_id)?-1:1;
+	int sign = (player==game->player_id)?1:-1;
 	for(i=0;i<n;i++) {
 		for(j=0;j<n;j++) {
 			if(game->height[i][j]>0 && (game->board[i][j][game->height[i][j] - 1])*sign > 0) {

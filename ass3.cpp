@@ -52,23 +52,23 @@ int main() {
 	movesptr = &moves;
 
 
-	// flatstones = 20;
-	// capstones = 1;
+	flatstones = 20;
+	capstones = 1;
 
-	// board = new int**[n];
-	// height = new int*[n];
-	// for(i=0;i<n;i++) {
-	// 	board[i] = new int*[n];
-	// 	height[i] = new int[n];
-	// 	for(j=0;j<n;j++) {
-	// 		height[i][j] = 0;
-	// 		board[i][j] = new int[2*(flatstones)+capstones];
-	// 		for(k=0;k<n;k++) {
-	// 			board[i][j][k] = 0;
-	// 		}
-	// 	}
-	// }
-	///////////////////////////////////////////
+	board = new int**[n];
+	height = new int*[n];
+	for(i=0;i<n;i++) {
+		board[i] = new int*[n];
+		height[i] = new int[n];
+		for(j=0;j<n;j++) {
+			height[i][j] = 0;
+			board[i][j] = new int[2*(flatstones)+capstones];
+			for(k=0;k<n;k++) {
+				board[i][j][k] = 0;
+			}
+		}
+	}
+	/////////////////////////////////////////
 	
 	if(player_id==1) {
 		moves.clear();
@@ -172,96 +172,26 @@ int main() {
 		game->print_board();
 		// my_move(str);
 	}
-	// str = "Fe2";
-	// cout<<str<<endl;
-	// game->update_board(str,1);
-	// game->print_board();
 
-	// str = "Fe1";
-	// cout<<str<<endl;
+	// string strs[] = {"Fd1","Fe5","Fc3","Fd2","Fc4","Fd3","Fd4","Fb3","Fb4","Fa4","Fe4","1d3+1","Fd3","1a4>1","Fd5","Fb2","Fc5","Fc2","Fb5","Fa5","Ca4"};
+	// int bla;
+	// str = strs[0];
 	// game->update_board(str,2);
 	// game->print_board();
-
-	// str = "Se3";
-	// cout<<str<<endl;
+	// str = strs[1];
 	// game->update_board(str,1);
 	// game->print_board();
-	
-	// str = "Se4";
-	// cout<<str<<endl;
-	// game->update_board(str,2);
-	// game->print_board();
-
-	// str = "Fb2";
-	// cout<<str<<endl;
-	// game->update_board(str,1);
-	// game->print_board();
-	
-	// str = "Fc2";
-	// cout<<str<<endl;
-	// game->update_board(str,2);
-	// game->print_board();
-
-	// str = "Fa2";
-	// cout<<str<<endl;
-	// game->update_board(str,1);
-	// game->print_board();
-	
-	// str = "Sb3";
-	// cout<<str<<endl;
-	// game->update_board(str,2);
-	// game->print_board();
-
-	// str = "Fb1";
-	// cout<<str<<endl;
-	// game->update_board(str,1);
-	// game->print_board();
-	
-	// str = "Fb5";
-	// cout<<str<<endl;
-	// game->update_board(str,2);
-	// game->print_board();
-
-	// str = "1a2>1";
-	// cout<<str<<endl;
-	// game->update_board(str,1);
-	// game->print_board();
-	
-	// str = "Fa5";
-	// cout<<str<<endl;
-	// game->update_board(str,2);
-	// game->print_board();
-
-	// str = "1b1+1";
-	// cout<<str<<endl;
-	// game->update_board(str,1);
-	// game->print_board();
-	
-	// str = "1a5>1";
-	// cout<<str<<endl;
-	// game->update_board(str,2);
-	// game->print_board();
-
-	// str = "Cc5";
-	// cout<<str<<endl;
-	// game->update_board(str,1);
-	// game->print_board();
-	
-	// str = "1c2<1";
-	// cout<<str<<endl;
-	// game->update_board(str,2);
-	// game->print_board();
-
-	// str = "1c5<1";
-	// cout<<str<<endl;
-	// game->update_board(str,1);
-	// game->print_board();
-	
-	// str = "Cd1";
-	// cout<<str<<endl;
-	// game->update_board(str,2);
-	// game->print_board();
-
+	// for(bla=2;bla<21;bla++) {
+	// 	str = strs[bla];
+	// 	game->update_board(str,1+bla%2);
+	// 	game->print_board();
+	// }
+	// cout<<value(game,4,0,-65536,65536,false).first<<endl;
+	// vector<string> moves;
+	// generate_moves(moves,game,game->other_player);
+	// for(bla=0;bla<moves.size();bla++) {
+	// 	cout<<moves[bla]<<" ";
+	// }
 	// str = "2b5-11";
 	// cout<<str<<endl;
 	// game->update_board(str,1);
