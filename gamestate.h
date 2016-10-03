@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <vector>
 
+using namespace std;
+
 class gamestate
 {
 	public:
@@ -17,7 +19,11 @@ class gamestate
 	int myFlatstones, myCapstones;
 	int otherFlatstones, otherCapstones;
 	gamestate(int, int, int);
-	void update_board(std::string, int);
-	void undo_move(std::string, int);
-	bool over();
+	void update_board(string, int);
+	void undo_move(string, int);
+	bool roadUtil(int, int, int**, int, int);
+	bool road(int);
+	void getNeighbours(int, int, int, vector<pair<int,int> >&);
+	int over();
+	void print_board();
 };

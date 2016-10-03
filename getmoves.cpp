@@ -8,7 +8,7 @@
 using namespace std;
 
 
-void place_new(vector<string> &moves, gamestate* game) 
+void place_new(vector<string> &moves, gamestate* game, int player) 
 {
 	// vector<string> &moves = *v;
 	// gamestate &game = *g;
@@ -23,12 +23,21 @@ void place_new(vector<string> &moves, gamestate* game)
 				c = i + 'a';
 				str += c;
 				str += to_string(j+1);
-				if(game->myFlatstones>0) {
-					moves.push_back("F"+str);
-					moves.push_back("S"+str);
+				if(player==game->player_id) {
+					if(game->myFlatstones>0) {
+						moves.push_back("F"+str);
+						moves.push_back("S"+str);
+					}
+					if(game->myCapstones>0)
+						moves.push_back("C"+str);
+				} else {
+					if(game->otherFlatstones>0) {
+						moves.push_back("F"+str);
+						moves.push_back("S"+str);
+					}
+					if(game->otherCapstones>0)
+						moves.push_back("C"+str);
 				}
-				if(game->myCapstones>0)
-					moves.push_back("C"+str);
 			}
 		}
 	}
@@ -42,7 +51,7 @@ void move_stack(int i, int j, int total, int direction, string str, int top,vect
 	// gamestate &game = *g;
 	int n = game->n;
 
-	cerr<<str<<"\n";
+	// cerr<<str<<"\n";
 	if(total==0) {
 		moves.push_back(str);
 		return;
@@ -111,20 +120,21 @@ void move_stack(int i, int j, int total, int direction, string str, int top,vect
 }
 
 
-void generate_moves(vector<string> &moves, gamestate* game) 
+void generate_moves(vector<string> &moves, gamestate* game, int player) 
 {
 	// vector<string> &moves = *v;
 	// gamestate &game = *g;
 	int n = game->n;
 
 	moves.clear();
-	place_new(moves,game);
+	place_new(moves,game,player);
 	int i,j,k,max_stack_move;
 	string str,str1;
 	char c;
+	int sign = (player==game->player_id)?-1:1;
 	for(i=0;i<n;i++) {
 		for(j=0;j<n;j++) {
-			if(game->height[i][j]>0 && game->board[i][j][game->height[i][j] - 1] > 0) {
+			if(game->height[i][j]>0 && (game->board[i][j][game->height[i][j] - 1])*sign > 0) {
 				max_stack_move = min(n,game->height[i][j]);
 				c = i + 'a';
 				str = "";
@@ -132,10 +142,10 @@ void generate_moves(vector<string> &moves, gamestate* game)
 				str += to_string(j+1);
 				for(k=1;k<=max_stack_move;k++) {
 					str1 = to_string(k) + str;
-					move_stack(i,j,k, 0, str1+">",game->board[i][j][game->height[i][j] - 1],moves,game);
-					move_stack(i,j,k, 1, str1+"<",game->board[i][j][game->height[i][j] - 1],moves,game);
-					move_stack(i,j,k, 2, str1+"+",game->board[i][j][game->height[i][j] - 1],moves,game);
-					move_stack(i,j,k, 3, str1+"-",game->board[i][j][game->height[i][j] - 1],moves,game);
+					move_stack(i,j,k, 0, str1+">",abs(game->board[i][j][game->height[i][j] - 1]),moves,game);
+					move_stack(i,j,k, 1, str1+"<",abs(game->board[i][j][game->height[i][j] - 1]),moves,game);
+					move_stack(i,j,k, 2, str1+"+",abs(game->board[i][j][game->height[i][j] - 1]),moves,game);
+					move_stack(i,j,k, 3, str1+"-",abs(game->board[i][j][game->height[i][j] - 1]),moves,game);
 				}
 			}
 		}

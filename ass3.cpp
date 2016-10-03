@@ -4,6 +4,7 @@
 #include <vector>
 #include "gamestate.h"
 #include "getmoves.h"
+#include "minimax.h"
 
 using namespace std;
 
@@ -16,296 +17,6 @@ int tl = 0;
 vector<string> moves;
 vector<string> *movesptr;
 
-// int flatstones, capstones; //no. of unused pieces
-
-// void opponent_move(string move) {
-// 	int i,j;
-// 	int it,it2,stack_size,step;
-// 	switch(move[0]) {
-// 		case 'F': cerr<<move<<" oF\n";
-// 				  i = move[1] - 'a';
-// 				  j = move[2] - '1';
-// 				  board[i][j][height[i][j]] = -1;
-// 				  height[i][j]++;
-// 				  break;
-// 		case 'S': cerr<<move<<" oS\n";
-// 				  i = move[1] - 'a';
-// 				  j = move[2] - '1';
-// 				  board[i][j][height[i][j]] = -2;
-// 				  height[i][j]++;
-// 				  break;
-// 		case 'C': cerr<<move<<" oC\n";
-// 				  i = move[1] - 'a';
-// 				  j = move[2] - '1';
-// 				  board[i][j][height[i][j]] = -3;
-// 				  height[i][j]++;
-// 				  break;
-// 		default: cerr<<move<<" oStack\n";
-// 				 stack_size = move[0] - '0';
-// 				 i = move[1] - 'a';
-// 				 j = move[2] - '1';
-// 				 height[i][j] -= stack_size;
-// 				 switch(move[3]) {
-// 				 	case '>': for(it=4;it<move.length();it++) {
-// 				 				step = move[it] - '0';
-// 				 				it2 = step;
-// 				 				while(it2>0) {
-// 				 					board[i+it-3][j][height[i+it-3][j] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
-// 				 					board[i][j][height[i][j] + it2 - 1] = 0;
-// 				 					it2--;
-// 				 				}
-// 				 				height[i][j] += step;
-// 				 				height[i+it-3][j] += step;
-// 				 			  }
-// 				 			  break;
-				 			  
-// 				 	case '<': for(it=4;it<move.length();it++) {
-// 				 				step = move[it] - '0';
-// 				 				it2 = step;
-// 				 				while(it2>0) {
-// 				 					board[i-it+3][j][height[i-it+3][j] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
-// 				 					board[i][j][height[i][j] + it2 - 1] = 0;
-// 				 					it2--;
-// 				 				}
-// 				 				height[i][j] += step;
-// 				 				height[i-it+3][j] += step;
-// 				 			  }
-// 				 			  break;
-
-// 				 	case '+': for(it=4;it<move.length();it++) {
-// 				 				step = move[it] - '0';
-// 				 				it2 = step;
-// 				 				while(it2>0) {
-// 				 					board[i][j+it-3][height[i][j+it-3] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
-// 				 					board[i][j][height[i][j] + it2 - 1] = 0;
-// 				 					it2--;
-// 				 				}
-// 				 				height[i][j] += step;
-// 				 				height[i][j+it-3] += step;
-// 				 			  }
-// 				 			  break;
-				 			  
-// 				 	default: for(it=4;it<move.length();it++) {
-// 				 				step = move[it] - '0';
-// 				 				it2 = step;
-// 				 				while(it2>0) {
-// 				 					board[i][j-it+3][height[i][j-it+3] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
-// 				 					board[i][j][height[i][j] + it2 - 1] = 0;
-// 				 					it2--;
-// 				 				}
-// 				 				height[i][j] += step;
-// 				 				height[i][j-it+3] += step;
-// 				 			  }
-				 			  
-// 				 }
-// 				 height[i][j] -= stack_size;
-// 	}
-// }	
-
-// void my_move(string move) {
-// 	int i,j;
-// 	int it,it2,stack_size,step;
-// 	switch(move[0]) {
-// 		case 'F': cerr<<move<<" mF\n";
-// 				  i = move[1] - 'a';
-// 				  j = move[2] - '1';
-// 				  board[i][j][height[i][j]] = 1;
-// 				  height[i][j]++;
-// 				  flatstones--;
-// 				  break;
-// 		case 'S': cerr<<move<<" mS\n";
-// 				  i = move[1] - 'a';
-// 				  j = move[2] - '1';
-// 				  board[i][j][height[i][j]] = 2;
-// 				  height[i][j]++;
-// 				  flatstones--;
-// 				  break;
-// 		case 'C': cerr<<move<<" mC\n";
-// 				  i = move[1] - 'a';
-// 				  j = move[2] - '1';
-// 				  board[i][j][height[i][j]] = 3;
-// 				  height[i][j]++;
-// 				  capstones--;
-// 				  break;
-// 		default: cerr<<move<<" mStack\n";
-// 				 stack_size = move[0] - '0';
-// 				 i = move[1] - 'a';
-// 				 j = move[2] - '1';
-// 				 height[i][j] -= stack_size;
-// 				 switch(move[3]) {
-// 				 	case '>': for(it=4;it<move.length();it++) {
-// 				 				step = move[it] - '0';
-// 				 				it2 = step;
-// 				 				while(it2>0) {
-// 				 					board[i+it-3][j][height[i+it-3][j] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
-// 				 					board[i][j][height[i][j] + it2 - 1] = 0;
-// 				 					it2--;
-// 				 				}
-// 				 				height[i][j] += step;
-// 				 				height[i+it-3][j] += step;
-// 				 			  }
-// 				 			  break;
-				 			  
-// 				 	case '<': for(it=4;it<move.length();it++) {
-// 				 				step = move[it] - '0';
-// 				 				it2 = step;
-// 				 				while(it2>0) {
-// 				 					board[i-it+3][j][height[i-it+3][j] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
-// 				 					board[i][j][height[i][j] + it2 - 1] = 0;
-// 				 					it2--;
-// 				 				}
-// 				 				height[i][j] += step;
-// 				 				height[i-it+3][j] += step;
-// 				 			  }
-// 				 			  break;
-
-// 				 	case '+': for(it=4;it<move.length();it++) {
-// 				 				step = move[it] - '0';
-// 				 				it2 = step;
-// 				 				while(it2>0) {
-// 				 					board[i][j+it-3][height[i][j+it-3] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
-// 				 					board[i][j][height[i][j] + it2 - 1] = 0;
-// 				 					it2--;
-// 				 				}
-// 				 				height[i][j] += step;
-// 				 				height[i][j+it-3] += step;
-// 				 			  }
-// 				 			  break;
-				 			  
-// 				 	default: for(it=4;it<move.length();it++) {
-// 				 				step = move[it] - '0';
-// 				 				it2 = step;
-// 				 				while(it2>0) {
-// 				 					board[i][j-it+3][height[i][j-it+3] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
-// 				 					board[i][j][height[i][j] + it2 - 1] = 0;
-// 				 					it2--;
-// 				 				}
-// 				 				height[i][j] += step;
-// 				 				height[i][j-it+3] += step;
-// 				 			  }
-				 			  
-// 				 }
-// 				 height[i][j] -= stack_size;
-// 	}
-// }
-
-// void place_new() {
-// 	int i,j;
-// 	string str;
-// 	char c;
-// 	for(i=0;i<n;i++) {
-// 		for(j=0;j<n;j++) {
-// 			if(height[i][j] == 0) {
-// 				str = "";
-// 				c = i + 'a';
-// 				str += c;
-// 				str += to_string(j+1);
-// 				if(flatstones>0) {
-// 					moves.push_back("F"+str);
-// 					moves.push_back("S"+str);
-// 				}
-// 				if(capstones>0)
-// 					moves.push_back("C"+str);
-// 			}
-// 		}
-// 	}
-// }
-
-// void move_stack(int i, int j, int total, int direction, string str, int top) { //direction is 0 for >, 1 for <, 2 for +, 3 for - /////top is 1 for flatstone, 2 for wall, 3 for capstone
-// 	cerr<<str<<"\n";
-// 	if(total==0) {
-// 		moves.push_back(str);
-// 		return;
-// 	}
-// 	int it1;
-// 	switch(direction) {
-// 		case 0: if(i==n-1) 
-// 					return;
-// 				if(abs(board[i+1][j][height[i+1][j] - 1] ) == 3)
-// 					return;
-// 				if(abs(board[i+1][j][height[i+1][j] - 1] ) == 2) {
-// 					if(top==3 && total==1) {
-// 						move_stack(i+1,j,0,direction,str+to_string(total),top);					
-// 					}
-// 					return;
-// 				}
-// 				for(it1=1;it1<=total;it1++) {
-// 					move_stack(i+1,j,total-it1,direction,str+to_string(it1),top);
-// 				}
-// 				break;
-
-// 		case 1: if(i==0) 
-// 					return;
-// 				if(abs(board[i-1][j][height[i-1][j] - 1] ) == 3)
-// 					return;
-// 				if(abs(board[i-1][j][height[i-1][j] - 1] ) == 2) {
-// 					if(top==3 && total==1) {
-// 						move_stack(i-1,j,0,direction,str+to_string(total),top);					
-// 					}
-// 					return;
-// 				}
-// 				for(it1=1;it1<=total;it1++) {
-// 					move_stack(i-1,j,total-it1,direction,str+to_string(it1),top);
-// 				}
-// 				break;
-
-// 		case 2: if(j==n-1) 
-// 					return;
-// 				if(abs(board[i][j+1][height[i][j+1] - 1] ) == 3)
-// 					return;
-// 				if(abs(board[i][j+1][height[i][j+1] - 1] ) == 2) {
-// 					if(top==3 && total==1) {
-// 						move_stack(i,j+1,0,direction,str+to_string(total),top);					
-// 					}
-// 					return;
-// 				}
-// 				for(it1=1;it1<=total;it1++) {
-// 					move_stack(i,j+1,total-it1,direction,str+to_string(it1),top);
-// 				}
-// 				break;
-
-// 		default: if(j==0) 
-// 					return;
-// 				if(abs(board[i][j-1][height[i][j-1] - 1] ) == 3)
-// 					return;
-// 				if(abs(board[i][j-1][height[i][j-1] - 1] ) == 2) {
-// 					if(top==3 && total==1) {
-// 						move_stack(i,j-1,0,direction,str+to_string(total),top);					
-// 					}
-// 					return;
-// 				}
-// 				for(it1=1;it1<=total;it1++) {
-// 					move_stack(i,j-1,total-it1,direction,str+to_string(it1),top);
-// 				}
-// 	}
-
-// }
-
-// void generate_moves() {
-// 	moves.clear();
-// 	place_new();
-// 	int i,j,k,max_stack_move;
-// 	string str,str1;
-// 	char c;
-// 	for(i=0;i<n;i++) {
-// 		for(j=0;j<n;j++) {
-// 			if(height[i][j]>0 && board[i][j][height[i][j] - 1] > 0) {
-// 				max_stack_move = min(n,height[i][j]);
-// 				c = i + 'a';
-// 				str = "";
-// 				str += c;
-// 				str += to_string(j+1);
-// 				for(k=1;k<=max_stack_move;k++) {
-// 					str1 = to_string(k) + str;
-// 					move_stack(i,j,k, 0, str1+">",board[i][j][height[i][j] - 1]);
-// 					move_stack(i,j,k, 1, str1+"<",board[i][j][height[i][j] - 1]);
-// 					move_stack(i,j,k, 2, str1+"+",board[i][j][height[i][j] - 1]);
-// 					move_stack(i,j,k, 3, str1+"-",board[i][j][height[i][j] - 1]);
-// 				}
-// 			}
-// 		}
-// 	}
-// }
 
 int main() {
 
@@ -314,7 +25,7 @@ int main() {
 	int temp,i,j,k;
 	char c;
 
-	////player no., board size, time in seconds/////
+	//player no., board size, time in seconds/////
 	getline(cin,str);
 	i = 0;
 	while(str[i]!=' ') {
@@ -331,6 +42,10 @@ int main() {
 		tl = tl*10 + (str[i] - '0');
 		i++;
 	}
+
+	// player_id = 1;
+	// n = 5;
+	// tl = 120;
 
 
 	gamestate *game = new gamestate(n,tl,player_id);
@@ -375,11 +90,35 @@ int main() {
 		temp = rand()%moves.size();
 		str = moves[temp];
 		cout<<str<<endl;
-		game->update_board(str,1);
+		game->update_board(str,2);
+		cerr<<"player 1 first move"<<endl<<endl;
+		game->print_board();
 		// my_move(str);
+
+		getline(cin,str);
+		// cerr<<"getline after\n";
+		game->update_board(str,1);
+		cerr<<"opponent_move"<<endl<<endl;
+		game->print_board();
+		// opponent_move(str);
+		// cerr<<"opponent_move after\n";
+
+		// generate_moves(moves,game);
+		// if(moves.size()==0)
+		// 	return 0;
+		// temp = rand()%moves.size();
+		// str = moves[temp];
+
+		str =  value(game,4,0,-65536,65536,true).second;
+			
+		// cerr<<str<<"\n";
+		cout<<str<<endl;
+		game->update_board(str,player_id);
+		cerr<<"my move"<<endl<<endl;
+		game->print_board();
 	} else {
 		getline(cin,str);
-		game->update_board(str,1);
+		game->update_board(str,2);
 		// opponent_move(str);
 		moves.clear();
 
@@ -400,30 +139,157 @@ int main() {
 		temp = rand()%moves.size();
 		str = moves[temp];
 		cout<<str<<endl;
-		game->update_board(str,2);
+		game->update_board(str,1);
+		cerr<<"player 2 first move"<<endl<<endl;
+		game->print_board();
 		// my_move(str);
 	}
 
 	int opp = (player_id==1)?2:1; 
 	
 	while(true) {
-		cerr<<"getline before\n";
+		// cerr<<"getline before\n";
 		getline(cin,str);
-		cerr<<"getline after\n";
+		// cerr<<"getline after\n";
 		game->update_board(str,opp);
+		cerr<<"opponent_move"<<endl<<endl;
+		game->print_board();
 		// opponent_move(str);
-		cerr<<"opponent_move after\n";
+		// cerr<<"opponent_move after\n";
 
-		generate_moves(moves,game);
-		if(moves.size()==0)
-			return 0;
-		temp = rand()%moves.size();
-		str = moves[temp];
+		// generate_moves(moves,game);
+		// if(moves.size()==0)
+		// 	return 0;
+		// temp = rand()%moves.size();
+		// str = moves[temp];
+
+		str =  value(game,4,0,-65536,65536,true).second;
 			
-		cerr<<str<<"\n";
+		// cerr<<str<<"\n";
 		cout<<str<<endl;
 		game->update_board(str,player_id);
+		cerr<<"my move"<<endl<<endl;
+		game->print_board();
 		// my_move(str);
 	}
+	// str = "Fe2";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+
+	// str = "Fe1";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+
+	// str = "Se3";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+	
+	// str = "Se4";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+
+	// str = "Fb2";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+	
+	// str = "Fc2";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+
+	// str = "Fa2";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+	
+	// str = "Sb3";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+
+	// str = "Fb1";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+	
+	// str = "Fb5";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+
+	// str = "1a2>1";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+	
+	// str = "Fa5";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+
+	// str = "1b1+1";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+	
+	// str = "1a5>1";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+
+	// str = "Cc5";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+	
+	// str = "1c2<1";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+
+	// str = "1c5<1";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+	
+	// str = "Cd1";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+
+	// str = "2b5-11";
+	// cout<<str<<endl;
+	// game->update_board(str,1);
+	// game->print_board();
+	// bool b1 = game->wallToFlat;
+
+	// str = "4b2>211";
+	// cout<<str<<endl;
+	// game->update_board(str,2);
+	// game->print_board();
+	// bool b2 = game->wallToFlat;
+	
+
+	// string arr[] = {"4b2>211","2b5-11","Cd1","1c5<1","1c2<1","Cc5","1a5>1","1b1+1","Fa5","1a2>1","Fb5","Fb1","Sb3","Fa2","Fc2","Fb2","Se4","Se3","Fe1","Fe2"};
+
+	// for(int bla=0;bla<20;bla++) {
+	// 	if(bla==0)
+	// 		game->wallToFlat = b2;
+	// 	else if(bla==1)
+	// 		game->wallToFlat = b1;
+	// 	str = arr[bla];
+	// 	cout<<"Undo "<<str<<endl;
+	// 	game->undo_move(str,2 - (bla%2));
+	// 	game->print_board();
+
+	// }
+	
+
+
 	return 0;
 }
