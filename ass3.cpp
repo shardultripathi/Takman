@@ -52,22 +52,22 @@ int main() {
 	movesptr = &moves;
 
 
-	flatstones = 20;
-	capstones = 1;
+	// flatstones = 20;
+	// capstones = 1;
 
-	board = new int**[n];
-	height = new int*[n];
-	for(i=0;i<n;i++) {
-		board[i] = new int*[n];
-		height[i] = new int[n];
-		for(j=0;j<n;j++) {
-			height[i][j] = 0;
-			board[i][j] = new int[2*(flatstones)+capstones];
-			for(k=0;k<n;k++) {
-				board[i][j][k] = 0;
-			}
-		}
-	}
+	// board = new int**[n];
+	// height = new int*[n];
+	// for(i=0;i<n;i++) {
+	// 	board[i] = new int*[n];
+	// 	height[i] = new int[n];
+	// 	for(j=0;j<n;j++) {
+	// 		height[i][j] = 0;
+	// 		board[i][j] = new int[2*(flatstones)+capstones];
+	// 		for(k=0;k<n;k++) {
+	// 			board[i][j][k] = 0;
+	// 		}
+	// 	}
+	// }
 	/////////////////////////////////////////
 	
 	if(player_id==1) {
@@ -109,7 +109,7 @@ int main() {
 		// temp = rand()%moves.size();
 		// str = moves[temp];
 
-		str =  value(game,4,0,-65536,65536,true).second;
+		str =  value(game,5,0,-65536,65536,true).second;
 			
 		// cerr<<str<<"\n";
 		cout<<str<<endl;
@@ -154,6 +154,9 @@ int main() {
 		game->update_board(str,opp);
 		cerr<<"opponent_move"<<endl<<endl;
 		game->print_board();
+		if (game->over() != 4)
+			break;
+
 		// opponent_move(str);
 		// cerr<<"opponent_move after\n";
 
@@ -163,13 +166,16 @@ int main() {
 		// temp = rand()%moves.size();
 		// str = moves[temp];
 
-		str =  value(game,4,0,-65536,65536,true).second;
+		str =  value(game,5,0,-65536,65536,true).second;
 			
 		// cerr<<str<<"\n";
 		cout<<str<<endl;
 		game->update_board(str,player_id);
 		cerr<<"my move"<<endl<<endl;
 		game->print_board();
+		if (game->over() != 4)
+			break;
+
 		// my_move(str);
 	}
 

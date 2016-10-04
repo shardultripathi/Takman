@@ -244,122 +244,6 @@ using namespace std;
 		}
 	}
 
-	bool gamestate::roadUtil(int direction, int sign, int** visited, int i, int j)
-	{
-		if (direction==1)
-		{
-			visited[i][j] = 1;
-			if (j==n-1)
-			{
-				if (board[i][j][height[i][j]-1]==sign*1 || board[i][j][height[i][j]-1]==sign*3)
-					return true;
-				else return false;
-			}
-			if (i==0)
-			{
-				if (visited[i+1][j]==0 && (board[i+1][j][height[i+1][j]-1]==sign*1 || board[i+1][j][height[i+1][j]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i+1,j);
-				else if (visited[i][j+1]==0 && (board[i][j+1][height[i][j+1]-1]==sign*1 || board[i][j+1][height[i][j+1]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i,j+1);
-				else return false;
-			}
-			else if(i==n-1)
-			{
-				if (visited[i-1][j]==0 && (board[i-1][j][height[i-1][j]-1]==sign*1 || board[i-1][j][height[i-1][j]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i-1,j);
-				else if (visited[i][j+1]==0 && (board[i][j+1][height[i][j+1]-1]==sign*1 || board[i][j+1][height[i][j+1]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i,j+1);
-				else return false;
-			}
-			else
-			{
-				if (visited[i-1][j]==0 && (board[i-1][j][height[i-1][j]-1]==sign*1 || board[i-1][j][height[i-1][j]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i-1,j);
-				else if (visited[i+1][j]==0 && (board[i+1][j][height[i+1][j]-1]==sign*1 || board[i+1][j][height[i+1][j]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i+1,j);
-				else if (visited[i][j+1]==0 && (board[i][j+1][height[i][j+1]-1]==sign*1 || board[i][j+1][height[i][j+1]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i,j+1);
-				else return false;	
-			}
-		}
-		else
-		{
-			visited[i][j] = 1;
-			if (i==n-1)
-			{
-				if (board[i][j][height[i][j]-1]==sign*1 || board[i][j][height[i][j]-1]==sign*3)
-					return true;
-				else return false;
-			}
-			if (j==0)
-			{
-				if (visited[i+1][j]==0 && (board[i+1][j][height[i+1][j]-1]==sign*1 || board[i+1][j][height[i+1][j]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i+1,j);
-				else if (visited[i][j+1]==0 && (board[i][j+1][height[i][j+1]-1]==sign*1 || board[i][j+1][height[i][j+1]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i,j+1);
-				else return false;
-			}
-			else if(j==n-1)
-			{
-				if (visited[i][j-1]==0 && (board[i][j-1][height[i][j-1]-1]==sign*1 || board[i][j-1][height[i][j-1]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i,j-1);
-				else if (visited[i+1][j]==0 && (board[i+1][j][height[i+1][j]-1]==sign*1 || board[i+1][j][height[i+1][j]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i+1,j);
-				else return false;
-			}
-			else
-			{
-				if (visited[i][j-1]==0 && (board[i][j-1][height[i][j-1]-1]==sign*1 || board[i][j-1][height[i][j-1]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i,j-1);
-				else if (visited[i+1][j]==0 && (board[i+1][j][height[i+1][j]-1]==sign*1 || board[i+1][j][height[i+1][j]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i+1,j);
-				else if (visited[i][j+1]==0 && (board[i][j+1][height[i][j+1]-1]==sign*1 || board[i][j+1][height[i][j+1]-1]==sign*3))
-					return roadUtil(direction,sign,visited,i,j+1);
-				else return false;	
-			}
-		}
-	}
-
-	bool gamestate::road(int player)
-	{
-		int** visited;
-		visited = new int*[n];
-		for (int i=0; i<n; i++)
-		{
-			visited[i] = new int[n];
-			for (int j=0; j<n; j++)
-				visited[i][j] = 0;
-		}
-
-		bool temp = false;
-		int sign = (player==player_id)?1:-1; 
-		for (int i=0; i<n; i++)
-		{
-			if (visited[i][0]==0 && (board[i][0][height[i][0]-1]==sign*1 || board[i][0][height[i][0]-1]==sign*3))
-			{
-				temp = roadUtil(1,sign,visited,i,0);
-				if (temp) return true;
-			}
-		}
-
-		for (int i=0; i<n; i++)
-			for (int j=0; j<n; j++)
-				visited[i][j] = 0;
-
-		for (int j=0; j<n; j++)
-		{
-			if (visited[0][j]==0 && (board[0][j][height[0][j]-1]==sign*1 || board[0][j][height[0][j]-1]==sign*3))
-			{
-				temp = roadUtil(-1,sign,visited,0,j);
-				if (temp) return true;
-			}
-		}
-		return false;
-
-		// return roadUtil(1,(player==player_id)?true:false,visited,0,0) || roadUtil(-1,(player==player_id)?true:false,visited,0,0);
-		//// direction 1 for left to right road, -1 for top to bottom road
-	}
-
 	void gamestate::getNeighbours(int i, int j, int len, vector<pair<int,int> > &neighbours)
 	{
 		// vector<pair<int,int> > neighbours;
@@ -372,73 +256,76 @@ using namespace std;
 			if (i-l>-1) neighbours.push_back(make_pair(i-l,j));
 			if (j-l>-1) neighbours.push_back(make_pair(i,j-l));
 		}
+	}
 
-		// if (i==0)
-		// {
-		// 	if (j==0)
-		// 	{
-		// 		neighbours.push_back(make_pair(i+1,j));
-		// 		neighbours.push_back(make_pair(i,j+1));
-		// 		goto hell;
-		// 	}
-		// 	else if (j==n-1)
-		// 	{
-		// 		neighbours.push_back(make_pair(i+1,j));
-		// 		neighbours.push_back(make_pair(i,j-1));
-		// 		goto hell;
-		// 	}
-		// 	else
-		// 	{
-		// 		neighbours.push_back(make_pair(i+1,j));
-		// 		neighbours.push_back(make_pair(i,j+1));
-		// 		neighbours.push_back(make_pair(i,j-1));
-		// 		goto hell;
-		// 	}
-		// }
-		// if (j==0)
-		// {
-		// 	if (i==n-1)
-		// 	{
-		// 		neighbours.push_back(make_pair(i-1,j));
-		// 		neighbours.push_back(make_pair(i,j+1));
-		// 		goto hell;
-		// 	}
-		// 	else
-		// 	{
-		// 		neighbours.push_back(make_pair(i-1,j));
-		// 		neighbours.push_back(make_pair(i+1,j));
-		// 		neighbours.push_back(make_pair(i,j+1));
-		// 		goto hell;
-		// 	}
-		// }
-		// if (i==n-1)
-		// {
-		// 	if (j==n-1)
-		// 	{
-		// 		neighbours.push_back(make_pair(i-1,j));
-		// 		neighbours.push_back(make_pair(i,j-1));
-		// 		goto hell;	
-		// 	}
-		// 	else
-		// 	{
-		// 		neighbours.push_back(make_pair(i-1,j));
-		// 		neighbours.push_back(make_pair(i,j-1));
-		// 		neighbours.push_back(make_pair(i,j+1));
-		// 		goto hell;
-		// 	}
-		// }
-		// if (j==n-1)
-		// {
-		// 	neighbours.push_back(make_pair(i-1,j));
-		// 	neighbours.push_back(make_pair(i+1,j));
-		// 	neighbours.push_back(make_pair(i,j-1));
-		// 	goto hell;
-		// }
-		// neighbours.push_back(make_pair(i-1,j));
-		// neighbours.push_back(make_pair(i+1,j));
-		// neighbours.push_back(make_pair(i,j-1));
-		// neighbours.push_back(make_pair(i,j+1));
-		// hell: return neighbours;
+	bool gamestate::dfs (int direction, int sign, int** visited, int i, int j)
+	{
+		visited[i][j] = 1;
+		int ngb_i, ngb_j, ngb_h;
+
+		if (direction == 1)
+		{
+			if (j==n-1)
+				return true;
+		}
+		else 
+		{
+			if(i==n-1)
+				return true;
+		}
+			vector<pair<int,int> > v; getNeighbours(i,j,1,v);
+			for (int k=0; k<v.size(); k++)
+			{
+				ngb_i = v[k].first;
+				ngb_j = v[k].second;
+				ngb_h = height[ngb_i][ngb_j];
+				if (ngb_h > 0 && visited[ngb_i][ngb_j]==0 && (board[ngb_i][ngb_j][ngb_h-1]==sign*1 || board[ngb_i][ngb_j][ngb_h-1]==sign*3))
+					if(dfs(direction,sign,visited,ngb_i,ngb_j))
+						return true;
+			}
+			return false;
+	}
+
+	bool gamestate::road(int player)
+	{
+		int i,j;
+		int** visited;
+		visited = new int*[n];
+		for (i=0; i<n; i++)
+		{
+			visited[i] = new int[n];
+			for (j=0; j<n; j++)
+				visited[i][j] = 0;
+		}
+
+		int sign = (player==player_id)?1:-1;
+		int h = 0;
+		for (i=0; i<n; i++)
+		{
+			h = height[i][0];
+			if (h>0)
+			{
+				if (visited[i][0] == 0 && (board[i][0][h-1]==sign*1 || board[i][0][h-1]==sign*3))
+					if (dfs(1,sign,visited,i,0))
+						return true;
+			}
+		}
+
+		for (i=0; i<n; i++)
+			for (j=0; j<n; j++)
+				visited[i][j] = 0;
+
+		for (j=0; j<n; j++)
+		{
+			h = height[0][j];
+			if (h>0)
+			{
+				if (visited[0][j] == 0 && (board[0][j][h-1]==sign*1 || board[0][j][h-1]==sign*3))
+					if (dfs(-1,sign,visited,0,j))
+						return true;
+			}
+		}
+		return false;
 	}
 
 	int gamestate::over()

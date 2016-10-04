@@ -21,9 +21,9 @@ class gamestate
 	gamestate(int, int, int);
 	void update_board(string, int);
 	void undo_move(string, int);
-	bool roadUtil(int, int, int**, int, int);
-	bool road(int);
 	void getNeighbours(int, int, int, vector<pair<int,int> >&);
+	bool dfs(int, int, int**, int, int);
+	bool road(int);
 	int over();
 	void print_board();
 };
