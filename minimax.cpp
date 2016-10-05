@@ -1,13 +1,34 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <cmath>
+#include <limits>
 #include <vector>
+#include <algorithm>
 #include "gamestate.h"
 #include "getmoves.h"
 #include "minimax.h"
-#define neg	-65536
-#define pos	65536
+#define neg	-655360
+#define pos	655360
 using namespace std;
+
+int f = 100; int cs = 70; int w = 30;
+int c = 10; int ccap = 12;
+int s = 15;
+int inf = 10;
+int height;
+int i_ngb, j_ngb;
+int peice, opp_peice;
+vector<pair<int,int> > v;
+int flatcount = 0;
+int centre_control = 0;
+int stack_color = 0;
+int stack = 0;
+int influence = 0;int total_influence = 0;
+int mycolor=0; int oppcolor=0;
+int row = 0; int col = 0;
+int row_influence = 0; int col_influence = 0;
+int influence_table[5][5];
 
 int flatwin(gamestate* game)
 {
@@ -27,26 +48,19 @@ int flatwin(gamestate* game)
 
 int eval(gamestate* game)
 {
-	int flatcount = 0; int f = 100; int cs = 90; int w = 30;
-	int centre_control = 0; int c = 20; int ccap = 25;
-	int stack_color = 0; int s = 25;
-	int stack = 0;
-	int influence = 0; int inf = 20; int total_influence = 0;
-	int height;
-	int i_ngb, j_ngb;
-	int peice, opp_peice;
-	int mycolor=0; int oppcolor=0;
+	 flatcount = 0;
+	 centre_control = 0;
+	 stack_color = 0;
+	 stack = 0;
+	 influence = 0; total_influence = 0;
+	 mycolor=0;  oppcolor=0;
 	// vector<pair<int,int> > &v;
 
 	int n = game->n;
-	int** influence_table;
-	influence_table = new int*[n];
 	for (int i=0; i<n; i++)
-	{
-		influence_table[i] = new int[n];
 		for (int j=0; j<n; j++)
-			influence_table[i][j] = 0;
-	}
+			influence_table[i][j]=0;
+	
 
 	for (int i=0; i<n; i++)
 	{
@@ -98,15 +112,15 @@ int eval(gamestate* game)
 				peice = game->board[i][j][height-1];
 				if (peice==1) stack += (stack>0)?2*s:s;
 				else if (peice==-1) stack -= (stack>0)?0.5*s:2*s;
-				else if (peice==3) stack += (stack>0)?s*5:3*s;
-				else if (peice==-3) stack -= (stack>0)?s*3:s*5;
-				else if (peice==2) stack += 3*s;
-				else stack -= s*3;
+				else if (peice==3) stack += (stack>0)?s*5:2*s;
+				else if (peice==-3) stack -= (stack>0)?s*2:s*5;
+				else if (peice==2) stack += (stack>0)?3*s:s;
+				else stack -= (stack>0)?s:3*s;
 				stack_color += stack;
 
 				if (mycolor>=1 && peice > 0)
 				{
-					vector<pair<int,int> > v; game->getNeighbours(i,j,mycolor+1,v);
+					game->getNeighbours(i,j,mycolor+1,v);
 					for (int k=0; k<v.size(); k++)
 					{
 						i_ngb = v[k].first;
@@ -123,10 +137,11 @@ int eval(gamestate* game)
 								influence_table[i_ngb][j_ngb]++;
 						}
 					}
+					
 				}
 				if (oppcolor>=1 && peice < 0)
 				{
-					vector<pair<int,int> > v; game->getNeighbours(i,j,oppcolor+1,v);
+					game->getNeighbours(i,j,oppcolor+1,v);
 					for (int k=0; k<v.size(); k++)
 					{
 						i_ngb = v[k].first;
@@ -143,13 +158,14 @@ int eval(gamestate* game)
 								influence_table[i_ngb][j_ngb]--;
 						}
 					}
+					
 				}
 
 			}
 			if (height==1)
 			{
 				peice = game->board[i][j][0];
-				vector<pair<int,int> > v; game->getNeighbours(i,j,1,v);
+				game->getNeighbours(i,j,1,v);
 				for (int k=0; k<v.size(); k++)
 				{
 					i_ngb = v[k].first;
@@ -175,13 +191,13 @@ int eval(gamestate* game)
 						if (opp_peice!=3)
 							influence_table[i_ngb][j_ngb]--;
 					}
-				}
+				}			
 			}
 		}
 	}
 
-	int row = 0; int col = 0;
-	int row_influence = 0; int col_influence = 0;
+	row = 0; col = 0;
+	row_influence = 0; col_influence = 0;
 
 	for (int i=0; i<n; i++)
 	{
@@ -191,9 +207,9 @@ int eval(gamestate* game)
 			total_influence += influence_table[i][j]*inf;
 			row += influence_table[i][j];
 		}
-		if (row>=4*n/3)
+		if (row>=n)
 			row_influence += 2*inf*row;
-		if (row<=-4*n/3)
+		if (row<=-1*n)
 			row_influence -= 2*inf*row;
 	}
 	for (int j=0; j<n; j++)
@@ -203,14 +219,13 @@ int eval(gamestate* game)
 		{
 			col += influence_table[i][j];;
 		}
-		if (col>=4*n/3)
+		if (col>=n)
 			col_influence += 2*inf*col;
-		if (col<=-4*n/3)
+		if (col<=-1*n)
 			col_influence -= 2*inf*col;
 	}
 
-	return (flatcount + 0.2*centre_control + 0.2*stack_color + 0.6*total_influence + 0.5*row_influence + 0.5*col_influence);
-
+	return (8*flatcount + centre_control + 2*stack_color + 5*total_influence + 3*row_influence + 3*col_influence);
 }
 
 int max_val(int a, int b)
@@ -231,6 +246,26 @@ bool myComparison2(const pair<string,int> &a,const pair<string,int> &b)
 {
 	return a.second<b.second;
 }
+
+
+
+// string ids(gamestate* game)
+// {
+// 	string move;
+// 	for (int depth = 0; depth<5; depth++)
+// 	{
+// 		move = 
+// 	}
+// }
+
+// int pvs(gamestate* game, int depth, int alpha, int beta, bool maxNode)
+// {
+// 	int game_over = game->over();
+// }
+
+
+
+
 
 pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int beta, bool maxNode)
 {

@@ -5,6 +5,8 @@
 
 using namespace std;
 
+
+
 int flatwin(gamestate* );
 int eval(gamestate*);
 int max_val(int, int);

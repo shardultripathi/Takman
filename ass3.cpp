@@ -24,6 +24,7 @@ int main() {
 	string str;
 	int temp,i,j,k;
 	char c;
+	int count=0;
 
 	//player no., board size, time in seconds/////
 	getline(cin,str);
@@ -71,24 +72,8 @@ int main() {
 	/////////////////////////////////////////
 	
 	if(player_id==1) {
-		moves.clear();
 
-		for(i=0;i<n;i++) {
-			for(j=0;j<n;j++) {
-				if(game->height[i][j] == 0) {
-					str = "";
-					c = i + 'a';
-					str += c;
-					str += to_string(j+1);
-					moves.push_back("F"+str);
-				}
-			}
-
-		}
-
-
-		temp = rand()%moves.size();
-		str = moves[temp];
+		str = "Fa1";
 		cout<<str<<endl;
 		game->update_board(str,2);
 		cerr<<"player 1 first move"<<endl<<endl;
@@ -100,16 +85,8 @@ int main() {
 		game->update_board(str,1);
 		cerr<<"opponent_move"<<endl<<endl;
 		game->print_board();
-		// opponent_move(str);
-		// cerr<<"opponent_move after\n";
 
-		// generate_moves(moves,game);
-		// if(moves.size()==0)
-		// 	return 0;
-		// temp = rand()%moves.size();
-		// str = moves[temp];
-
-		str =  value(game,5,0,-65536,65536,true).second;
+		str =  value(game,3,0,-655360,655360,true).second;
 			
 		// cerr<<str<<"\n";
 		cout<<str<<endl;
@@ -119,25 +96,10 @@ int main() {
 	} else {
 		getline(cin,str);
 		game->update_board(str,2);
-		// opponent_move(str);
-		moves.clear();
-
-		for(i=0;i<n;i++) {
-			for(j=0;j<n;j++) {
-				if(game->height[i][j] == 0) {
-					str = "";
-					c = i + 'a';
-					str += c;
-					str += to_string(j+1);
-					moves.push_back("F"+str);
-				}
-			}
-
-		}
-
-
-		temp = rand()%moves.size();
-		str = moves[temp];
+		if (game->height[0][0]==0)
+			str = "Fa1";
+		else
+			str = "Fa5";
 		cout<<str<<endl;
 		game->update_board(str,1);
 		cerr<<"player 2 first move"<<endl<<endl;
@@ -146,32 +108,31 @@ int main() {
 	}
 
 	int opp = (player_id==1)?2:1; 
+	pair<int,string> t;
 	
 	while(true) {
 		// cerr<<"getline before\n";
-		getline(cin,str);
+		getline(cin,str); count++;
 		// cerr<<"getline after\n";
 		game->update_board(str,opp);
 		cerr<<"opponent_move"<<endl<<endl;
 		game->print_board();
+		cerr<<endl<<endl;
 		if (game->over() != 4)
 			break;
 
-		// opponent_move(str);
-		// cerr<<"opponent_move after\n";
-
-		// generate_moves(moves,game);
-		// if(moves.size()==0)
-		// 	return 0;
-		// temp = rand()%moves.size();
-		// str = moves[temp];
-
-		str =  value(game,5,0,-65536,65536,true).second;
+		
+		if (count<7)
+			t =  value(game,5,0,-65536,65536,true);
+		else 
+			t =  value(game,6,0,-65536,65536,true);
+		cerr<<"My move evaluation: "<<t.first<<endl;
 			
 		// cerr<<str<<"\n";
+		str = t.second;
 		cout<<str<<endl;
+		cerr<<endl;
 		game->update_board(str,player_id);
-		cerr<<"my move"<<endl<<endl;
 		game->print_board();
 		if (game->over() != 4)
 			break;

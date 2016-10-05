@@ -16,6 +16,9 @@ class gamestate
 	int** height;
 	bool wallToFlat;
 
+	// uint64_t hashKey;
+	// uint64_t**** zobrist;
+
 	int myFlatstones, myCapstones;
 	int otherFlatstones, otherCapstones;
 	gamestate(int, int, int);
