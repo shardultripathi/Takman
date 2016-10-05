@@ -2,7 +2,6 @@
 #include <string>
 #include <cstdlib>
 #include <cmath>
-#include <limits>
 #include <vector>
 #include <algorithm>
 #include "gamestate.h"
@@ -19,7 +18,7 @@ int inf = 10;
 int height;
 int i_ngb, j_ngb;
 int peice, opp_peice;
-vector<pair<int,int> > v;
+vector<pair<int,int> > neighbours;
 int flatcount = 0;
 int centre_control = 0;
 int stack_color = 0;
@@ -48,12 +47,12 @@ int flatwin(gamestate* game)
 
 int eval(gamestate* game)
 {
-	 flatcount = 0;
-	 centre_control = 0;
-	 stack_color = 0;
-	 stack = 0;
-	 influence = 0; total_influence = 0;
-	 mycolor=0;  oppcolor=0;
+	flatcount = 0;
+	centre_control = 0;
+	stack_color = 0;
+	stack = 0;
+	influence = 0; total_influence = 0;
+	mycolor=0;  oppcolor=0;
 	// vector<pair<int,int> > &v;
 
 	int n = game->n;
@@ -120,11 +119,12 @@ int eval(gamestate* game)
 
 				if (mycolor>=1 && peice > 0)
 				{
-					game->getNeighbours(i,j,mycolor+1,v);
-					for (int k=0; k<v.size(); k++)
+					// v.clear();
+					game->getNeighbours(i,j,mycolor+1,neighbours);
+					for (int k=0; k<neighbours.size(); k++)
 					{
-						i_ngb = v[k].first;
-						j_ngb = v[k].second;
+						i_ngb = neighbours[k].first;
+						j_ngb = neighbours[k].second;
 						opp_peice = game->board[i_ngb][j_ngb][game->height[i_ngb][j_ngb]-1];
 						if (peice==1 || peice==2)
 						{
@@ -141,11 +141,12 @@ int eval(gamestate* game)
 				}
 				if (oppcolor>=1 && peice < 0)
 				{
-					game->getNeighbours(i,j,oppcolor+1,v);
-					for (int k=0; k<v.size(); k++)
+					// neighbours.clear();
+					game->getNeighbours(i,j,oppcolor+1,neighbours);
+					for (int k=0; k<neighbours.size(); k++)
 					{
-						i_ngb = v[k].first;
-						j_ngb = v[k].second;
+						i_ngb = neighbours[k].first;
+						j_ngb = neighbours[k].second;
 						opp_peice = game->board[i_ngb][j_ngb][game->height[i_ngb][j_ngb]-1];
 						if (peice==-1 || peice==-2)
 						{
@@ -164,12 +165,13 @@ int eval(gamestate* game)
 			}
 			if (height==1)
 			{
+				// v.clear();
 				peice = game->board[i][j][0];
-				game->getNeighbours(i,j,1,v);
-				for (int k=0; k<v.size(); k++)
+				game->getNeighbours(i,j,1,neighbours);
+				for (int k=0; k<neighbours.size(); k++)
 				{
-					i_ngb = v[k].first;
-					j_ngb = v[k].second;
+					i_ngb = neighbours[k].first;
+					j_ngb = neighbours[k].second;
 					opp_peice = game->board[i_ngb][j_ngb][game->height[i_ngb][j_ngb]-1];
 					if (peice==1 || peice==2)
 					{
@@ -264,7 +266,8 @@ bool myComparison2(const pair<string,int> &a,const pair<string,int> &b)
 // }
 
 
-
+vector<string> d_moves;
+int dmoves_size;
 
 
 pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int beta, bool maxNode)
@@ -285,17 +288,50 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 
 	if (cutoff==depth)
 		return make_pair(eval(game),""); //// if it is maxnode =>
-																						//// came from a move of minnode => evaluate wrt to other player	
+										//// came from a move of minnode => evaluate wrt to other player	
 
 	bool localW2F;
+
+	if(depth==0) {
+		// cerr<<"enter"<<endl;
+		d_moves.clear();
+		generate_moves(d_moves,game,game->player_id);
+		// cerr<<"generated"<<endl;
+		dmoves_size = d_moves.size();
+		cerr<<dmoves_size<<endl;
+		for(int i=0;i<dmoves_size;i++) {
+			// cerr<<i<<endl;
+			game->update_board(d_moves[i],game->player_id);
+			// cerr<<"updated"<<endl;
+			game_over = game->over();
+			// cerr<<"over"<<endl;
+			if(game_over==1) {
+				game->undo_move(d_moves[i],game->player_id);
+				// cerr<<"meri road"<<endl;
+				return make_pair(pos,d_moves[i]);
+			}
+			if((game_over==2 || game_over==3) && flatwin(game)>0) {
+				game->undo_move(d_moves[i],game->player_id);
+				// cerr<<"flat"<<endl;
+				return make_pair(pos,d_moves[i]);
+			}
+			game->undo_move(d_moves[i],game->player_id);
+		}
+	}
+
+
+	
 
 	if (maxNode)
 	{
 		// cerr<<"MAXNODE"<<endl<<endl;
 		int max = neg;
+		
+		
 		vector<string> moves; generate_moves(moves,game,game->player_id);
+		
 		int moves_size = moves.size();
-		int max_index;
+		int max_index = 0;
 		int temp;
 
 		vector<pair<string,int> > sorted_moves;

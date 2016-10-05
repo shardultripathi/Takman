@@ -10,6 +10,9 @@
 
 using namespace std;
 
+
+int visited[5][5];
+
 gamestate::gamestate(int N, int time, int player)
 {
 	n = N;
@@ -267,7 +270,7 @@ void gamestate::getNeighbours(int i, int j, int len, vector<pair<int,int> > &nei
 	}
 }
 
-bool gamestate::dfs (int direction, int sign, int** visited, int i, int j)
+bool gamestate::dfs (int direction, int sign, int i, int j)
 {
 	visited[i][j] = 1;
 	int ngb_i, ngb_j, ngb_h;
@@ -282,14 +285,15 @@ bool gamestate::dfs (int direction, int sign, int** visited, int i, int j)
 		if(i==n-1)
 			return true;
 	}
-		vector<pair<int,int> > v; getNeighbours(i,j,1,v);
-		for (int k=0; k<v.size(); k++)
+
+	vector<pair<int,int> > dfs_v; getNeighbours(i,j,1,dfs_v);
+		for (int k=0; k<dfs_v.size(); k++)
 		{
-			ngb_i = v[k].first;
-			ngb_j = v[k].second;
+			ngb_i = dfs_v[k].first;
+			ngb_j = dfs_v[k].second;
 			ngb_h = height[ngb_i][ngb_j];
 			if (ngb_h > 0 && visited[ngb_i][ngb_j]==0 && (board[ngb_i][ngb_j][ngb_h-1]==sign*1 || board[ngb_i][ngb_j][ngb_h-1]==sign*3))
-				if(dfs(direction,sign,visited,ngb_i,ngb_j))
+				if(dfs(direction,sign,ngb_i,ngb_j))
 					return true;
 		}
 		return false;
@@ -298,11 +302,11 @@ bool gamestate::dfs (int direction, int sign, int** visited, int i, int j)
 bool gamestate::road(int player)
 {
 	int i,j;
-	int** visited;
-	visited = new int*[n];
+	// int** visited;
+	// visited = new int*[n];
 	for (i=0; i<n; i++)
 	{
-		visited[i] = new int[n];
+		// visited[i] = new int[n];
 		for (j=0; j<n; j++)
 			visited[i][j] = 0;
 	}
@@ -315,7 +319,7 @@ bool gamestate::road(int player)
 		if (h>0)
 		{
 			if (visited[i][0] == 0 && (board[i][0][h-1]==sign*1 || board[i][0][h-1]==sign*3))
-				if (dfs(1,sign,visited,i,0))
+				if (dfs(1,sign,i,0))
 					return true;
 		}
 	}
@@ -330,7 +334,7 @@ bool gamestate::road(int player)
 		if (h>0)
 		{
 			if (visited[0][j] == 0 && (board[0][j][h-1]==sign*1 || board[0][j][h-1]==sign*3))
-				if (dfs(-1,sign,visited,0,j))
+				if (dfs(-1,sign,0,j))
 					return true;
 		}
 	}

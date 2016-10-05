@@ -52,23 +52,6 @@ int main() {
 	gamestate *game = new gamestate(n,tl,player_id);
 	movesptr = &moves;
 
-
-	// flatstones = 20;
-	// capstones = 1;
-
-	// board = new int**[n];
-	// height = new int*[n];
-	// for(i=0;i<n;i++) {
-	// 	board[i] = new int*[n];
-	// 	height[i] = new int[n];
-	// 	for(j=0;j<n;j++) {
-	// 		height[i][j] = 0;
-	// 		board[i][j] = new int[2*(flatstones)+capstones];
-	// 		for(k=0;k<n;k++) {
-	// 			board[i][j][k] = 0;
-	// 		}
-	// 	}
-	// }
 	/////////////////////////////////////////
 	
 	if(player_id==1) {
@@ -76,23 +59,23 @@ int main() {
 		str = "Fa1";
 		cout<<str<<endl;
 		game->update_board(str,2);
-		cerr<<"player 1 first move"<<endl<<endl;
-		game->print_board();
+		// cerr<<"player 1 first move"<<endl<<endl;
+		// game->print_board();
 		// my_move(str);
 
 		getline(cin,str);
 		// cerr<<"getline after\n";
 		game->update_board(str,1);
-		cerr<<"opponent_move"<<endl<<endl;
-		game->print_board();
+		// cerr<<"opponent_move"<<endl<<endl;
+		// game->print_board();
 
 		str =  value(game,3,0,-655360,655360,true).second;
 			
 		// cerr<<str<<"\n";
 		cout<<str<<endl;
 		game->update_board(str,player_id);
-		cerr<<"my move"<<endl<<endl;
-		game->print_board();
+		// cerr<<"my move"<<endl<<endl;
+		// game->print_board();
 	} else {
 		getline(cin,str);
 		game->update_board(str,2);
@@ -102,8 +85,8 @@ int main() {
 			str = "Fa5";
 		cout<<str<<endl;
 		game->update_board(str,1);
-		cerr<<"player 2 first move"<<endl<<endl;
-		game->print_board();
+		// cerr<<"player 2 first move"<<endl<<endl;
+		// game->print_board();
 		// my_move(str);
 	}
 
@@ -115,32 +98,32 @@ int main() {
 		getline(cin,str); count++;
 		// cerr<<"getline after\n";
 		game->update_board(str,opp);
-		cerr<<"opponent_move"<<endl<<endl;
-		game->print_board();
-		cerr<<endl<<endl;
-		if (game->over() != 4)
-			break;
+		// cerr<<"opponent_move"<<endl<<endl;
+		// game->print_board();
+		// cerr<<endl<<endl;
+		// if (game->over() != 4)
+		// 	break;
 
 		
 		if (count<7)
-			t =  value(game,5,0,-65536,65536,true);
+			t =  value(game,4,0,-65536,65536,true);
 		else 
-			t =  value(game,6,0,-65536,65536,true);
-		cerr<<"My move evaluation: "<<t.first<<endl;
+			t =  value(game,5,0,-65536,65536,true);
+		// cerr<<"My move evaluation: "<<t.first<<endl;
 			
 		// cerr<<str<<"\n";
 		str = t.second;
 		cout<<str<<endl;
-		cerr<<endl;
+		// cerr<<endl;
 		game->update_board(str,player_id);
-		game->print_board();
-		if (game->over() != 4)
-			break;
+		// game->print_board();
+		// if (game->over() != 4)
+		// 	break;
 
 		// my_move(str);
 	}
 
-	// string strs[] = {"Fd1","Fe5","Fc3","Fd2","Fc4","Fd3","Fd4","Fb3","Fb4","Fa4","Fe4","1d3+1","Fd3","1a4>1","Fd5","Fb2","Fc5","Fc2","Fb5","Fa5","Ca4"};
+	// string strs[] = {"Fa1","Fa2","Fc3","1a1+1","Fc4","Fa1","Fd4","Fa3","Fd3","Fa4","Fa5","Cb4","Cb5","1b4<1","1b5<1"};
 	// int bla;
 	// str = strs[0];
 	// game->update_board(str,2);
@@ -148,12 +131,14 @@ int main() {
 	// str = strs[1];
 	// game->update_board(str,1);
 	// game->print_board();
-	// for(bla=2;bla<21;bla++) {
+	// for(bla=2;bla<15;bla++) {
 	// 	str = strs[bla];
 	// 	game->update_board(str,1+bla%2);
 	// 	game->print_board();
+	// 	cout<<endl;
 	// }
-	// cout<<value(game,4,0,-65536,65536,false).first<<endl;
+	// cout<<value(game,3,0,-65536,65536,false).first<<endl;
+	// // cout<<eval(game)<<endl;
 	// vector<string> moves;
 	// generate_moves(moves,game,game->other_player);
 	// for(bla=0;bla<moves.size();bla++) {
