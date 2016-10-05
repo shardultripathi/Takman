@@ -106,9 +106,9 @@ int main() {
 
 		
 		if (count<7)
-			t =  value(game,4,0,-65536,65536,true);
+			t =  value(game,4,0,-655360,655360,true);
 		else 
-			t =  value(game,5,0,-65536,65536,true);
+			t =  value(game,5,0,-655360,655360,true);
 		// cerr<<"My move evaluation: "<<t.first<<endl;
 			
 		// cerr<<str<<"\n";
