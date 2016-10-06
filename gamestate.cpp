@@ -1,15 +1,8 @@
-#include <iostream>
-#include <string>
-#include <ctype.h>
-#include <cstdlib>
-#include <cmath>
-#include <random>
-#include <vector>
 #include "gamestate.h"
 #include "getmoves.h"
+#include "minimax.h"
 
 using namespace std;
-
 
 int visited[5][5];
 
@@ -20,7 +13,7 @@ gamestate::gamestate(int N, int time, int player)
 	player_id = player;
 	other_player = (player==1)?2:1;
 
-	myFlatstones = otherFlatstones = 20; /////// do wrt n finally
+	myFlatstones = otherFlatstones = 21; /////// do wrt n finally
 	myCapstones = otherCapstones = 1;
 
 	board = new int**[n];
@@ -257,8 +250,6 @@ void gamestate::undo_move(string move, int player)
 
 void gamestate::getNeighbours(int i, int j, int len, vector<pair<int,int> > &neighbours)
 {
-	// vector<pair<int,int> > neighbours;
-	// pair<int,int> temp;
 	neighbours.clear();
 
 	for (int l=1; l<=len; l++)
@@ -302,11 +293,8 @@ bool gamestate::dfs (int direction, int sign, int i, int j)
 bool gamestate::road(int player)
 {
 	int i,j;
-	// int** visited;
-	// visited = new int*[n];
 	for (i=0; i<n; i++)
 	{
-		// visited[i] = new int[n];
 		for (j=0; j<n; j++)
 			visited[i][j] = 0;
 	}
@@ -385,6 +373,3 @@ void gamestate::print_board() {
 		cerr<<"\n";
 	}
 }
-
-
-// };

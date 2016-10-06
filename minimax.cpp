@@ -1,14 +1,10 @@
-#include <iostream>
-#include <string>
-#include <cstdlib>
-#include <cmath>
-#include <vector>
-#include <algorithm>
 #include "gamestate.h"
 #include "getmoves.h"
 #include "minimax.h"
+
 #define neg	-655360
 #define pos	655360
+
 using namespace std;
 
 int f = 100; int cs = 70; int w = 30;
@@ -18,16 +14,19 @@ int inf = 10;
 int height;
 int i_ngb, j_ngb;
 int peice, opp_peice;
-vector<pair<int,int> > neighbours;
+
+vector<pair<int,int> > neighbours;	///////////////////////////////
+
 int flatcount = 0;
 int centre_control = 0;
 int stack_color = 0;
 int stack = 0;
-int influence = 0;int total_influence = 0;
+int total_influence = 0;
 int mycolor=0; int oppcolor=0;
 int row = 0; int col = 0;
 int row_influence = 0; int col_influence = 0;
-int influence_table[5][5];
+
+int influence_table[5][5];	///////////////////////////////////
 
 int flatwin(gamestate* game)
 {
@@ -51,9 +50,8 @@ int eval(gamestate* game)
 	centre_control = 0;
 	stack_color = 0;
 	stack = 0;
-	influence = 0; total_influence = 0;
+	total_influence = 0;
 	mycolor=0;  oppcolor=0;
-	// vector<pair<int,int> > &v;
 
 	int n = game->n;
 	for (int i=0; i<n; i++)
@@ -249,8 +247,6 @@ bool myComparison2(const pair<string,int> &a,const pair<string,int> &b)
 	return a.second<b.second;
 }
 
-
-
 // string ids(gamestate* game)
 // {
 // 	string move;
@@ -292,41 +288,33 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 
 	bool localW2F;
 
-	if(depth==0) {
-		// cerr<<"enter"<<endl;
+	if(depth==0) 
+	{
 		d_moves.clear();
 		generate_moves(d_moves,game,game->player_id);
-		// cerr<<"generated"<<endl;
 		dmoves_size = d_moves.size();
-		cerr<<dmoves_size<<endl;
-		for(int i=0;i<dmoves_size;i++) {
-			// cerr<<i<<endl;
+
+		for(int i=0;i<dmoves_size;i++) 
+		{
 			game->update_board(d_moves[i],game->player_id);
-			// cerr<<"updated"<<endl;
 			game_over = game->over();
-			// cerr<<"over"<<endl;
-			if(game_over==1) {
+			if(game_over==1) 
+			{
 				game->undo_move(d_moves[i],game->player_id);
-				// cerr<<"meri road"<<endl;
 				return make_pair(pos,d_moves[i]);
 			}
-			if((game_over==2 || game_over==3) && flatwin(game)>0) {
+			if((game_over==2 || game_over==3) && flatwin(game)>0) 
+			{
 				game->undo_move(d_moves[i],game->player_id);
-				// cerr<<"flat"<<endl;
 				return make_pair(pos,d_moves[i]);
 			}
 			game->undo_move(d_moves[i],game->player_id);
 		}
 	}
 
-
-	
-
 	if (maxNode)
 	{
-		// cerr<<"MAXNODE"<<endl<<endl;
 		int max = neg;
-		
 		
 		vector<string> moves; generate_moves(moves,game,game->player_id);
 		
@@ -349,8 +337,6 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 		for (int i=0; i<moves_size; i++)
 		{
 			game->update_board(sorted_moves[i].first,game->player_id);
-			// cerr<<"MAX MOVE"<<endl<<endl;
-			// game->print_board();
 			localW2F = game->wallToFlat;
 			temp = value(game,cutoff,depth+1,alpha,beta,false).first;
 			if (temp>max)
@@ -360,8 +346,6 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 			}
 			game->wallToFlat = localW2F;
 			game->undo_move(sorted_moves[i].first,game->player_id);
-			// cerr<<"UNDOING MAX MOVE"<<endl<<endl;
-			// game->print_board();
 			if (max >= beta)
 				return make_pair(max,sorted_moves[i].first);
 			alpha = max_val(alpha,max);
@@ -370,11 +354,10 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 	}
 	else
 	{
-		// cerr<<"MINNODE"<<endl<<endl;
 		int min = pos;
 		vector<string> moves; generate_moves(moves,game,game->other_player);
 		int moves_size = moves.size();
-		int min_index;
+		int min_index = 0;
 		int temp;
 
 		vector<pair<string,int> > sorted_moves;
@@ -392,8 +375,6 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 		for (int i=0; i<moves_size; i++)
 		{
 			game->update_board(sorted_moves[i].first,game->other_player);
-			// cerr<<"MIN MOVE"<<endl<<endl;
-			// game->print_board();
 			localW2F = game->wallToFlat;
 			temp = value(game,cutoff,depth+1,alpha,beta,true).first;
 			if (temp<min)
@@ -403,8 +384,6 @@ pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int be
 			}
 			game->wallToFlat = localW2F;
 			game->undo_move(sorted_moves[i].first,game->other_player);
-			// cerr<<"UNDOING MIN MOVE"<<endl<<endl;
-			// game->print_board();
 			if (min <= alpha) 
 				return make_pair(min,sorted_moves[i].first);
 			beta = min_val(beta,min);

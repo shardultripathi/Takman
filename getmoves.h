@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <vector>
 
-void place_new(std::vector<std::string> &, gamestate*, int);
-void move_stack(int, int, int, int, std::string, int,std::vector<std::string> &, gamestate*);
-void generate_moves(std::vector<std::string> &, gamestate* , int); 
+using namespace std;
+
+void place_new(vector<string> &, gamestate*, int);
+void move_stack(int, int, int, int, string, int,vector<string> &, gamestate*);
+void generate_moves(vector<string> &, gamestate* , int); 

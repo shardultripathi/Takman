@@ -1,12 +1,8 @@
-#include <iostream>
-#include <string>
-#include <cstdlib>
-#include <vector>
 #include "gamestate.h"
 #include "getmoves.h"
+#include "minimax.h"
 
 using namespace std;
-
 
 void place_new(vector<string> &moves, gamestate* game, int player) 
 {

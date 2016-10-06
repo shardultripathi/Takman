@@ -6,8 +6,8 @@
 #     echo "Inputfile doesn't exist. Exitting..."
 #     exit 1
 # fi
-if [ -e "a.out" ]; then
-    ./a.out $1
+if [ -e "dstak" ]; then
+    ./dstak $1
 else
     echo "First run compile.sh to compile the code"
 fi
