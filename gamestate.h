@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <cstdlib>
 #include <cmath>
+#include <random>
 #include <vector>
 
 using namespace std;
@@ -18,8 +19,8 @@ class gamestate
 	int** height;
 	bool wallToFlat;
 
-	// uint64_t hashKey;
-	// uint64_t**** zobrist;
+	uint64_t hash;
+	uint64_t**** zobrist;
 
 	int myFlatstones, myCapstones;
 	int otherFlatstones, otherCapstones;
@@ -31,4 +32,19 @@ class gamestate
 	bool road(int);
 	int over();
 	void print_board();
+	uint64_t getHash();
+	// bool operator==(const gamestate&b) {
+ //            if (hash != b.hash)
+ //                return false;
+ //            for (int i = 0; i < n; i++)
+ //                for (int j = 0; j < n; j++) {
+ //                    if (height[i][j] != b.height[i][j])
+ //                        return false;
+ //                    for (int k = 0; k < height[i][j]; k++)
+ //                        if (board[i][j][k] != b.board[i][j][k])
+ //                            return false;
+ //                }
+ //            return true;
+ //        }
+	// uint64_t getHash() const { return hash; }
 };

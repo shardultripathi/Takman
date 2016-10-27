@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void place_new(vector<string> &moves, gamestate* game, int player) 
+void place_new(vector<string> &moves, gamestate* game, int player, bool isGetFlat) ///// change move ordering
 {
 	// vector<string> &moves = *v;
 	// gamestate &game = *g;
@@ -12,31 +12,75 @@ void place_new(vector<string> &moves, gamestate* game, int player)
 	int i,j;
 	string str;
 	char c;
-	for(i=0;i<n;i++) {
-		for(j=0;j<n;j++) {
-			if(game->height[i][j] == 0) {
-				str = "";
-				c = i + 'a';
-				str += c;
-				str += to_string(j+1);
-				if(player==game->player_id) {
-					if(game->myFlatstones>0) {
-						moves.push_back("F"+str);
-						moves.push_back("S"+str);
+	if(isGetFlat) {
+
+		for(i=0;i<n;i++) {
+			for(j=0;j<n;j++) {
+				if(game->height[i][j] == 0) {
+					str = "";
+					c = i + 'a';
+					str += c;
+					str += to_string(j+1);
+					if(player==game->player_id) {
+						if(game->myFlatstones>0) {
+							moves.push_back("F"+str);
+						}
+					} else {
+						if(game->otherFlatstones>0) {
+							moves.push_back("F"+str);
+						}
 					}
-					if(game->myCapstones>0)
-						moves.push_back("C"+str);
-				} else {
-					if(game->otherFlatstones>0) {
-						moves.push_back("F"+str);
-						moves.push_back("S"+str);
+				}
+			}
+		}	
+
+
+	} 
+
+	else {
+
+
+		for(i=0;i<n;i++) {
+			for(j=0;j<n;j++) {
+				if(game->height[i][j] == 0) {
+					str = "";
+					c = i + 'a';
+					str += c;
+					str += to_string(j+1);
+					if(player==game->player_id) {
+						if(game->myCapstones>0)
+							moves.push_back("C"+str);
+					} else {
+						if(game->otherCapstones>0)
+							moves.push_back("C"+str);
 					}
-					if(game->otherCapstones>0)
-						moves.push_back("C"+str);
 				}
 			}
 		}
+
+		for(i=0;i<n;i++) {
+			for(j=0;j<n;j++) {
+				if(game->height[i][j] == 0) {
+					str = "";
+					c = i + 'a';
+					str += c;
+					str += to_string(j+1);
+					if(player==game->player_id) {
+						if(game->myFlatstones>0) {
+							moves.push_back("S"+str);
+						}
+					} else {
+						if(game->otherFlatstones>0) {
+							moves.push_back("S"+str);
+						}
+					}
+				}
+			}
+		}
+
+		
 	}
+	
 }
 
 
@@ -123,7 +167,7 @@ void generate_moves(vector<string> &moves, gamestate* game, int player)
 	int n = game->n;
 
 	moves.clear();
-	place_new(moves,game,player);
+	place_new(moves,game,player,true);
 	int i,j,k,max_stack_move;
 	string str,str1;
 	char c;
@@ -146,5 +190,6 @@ void generate_moves(vector<string> &moves, gamestate* game, int player)
 			}
 		}
 	}
+	place_new(moves,game,player,false);
 }
 

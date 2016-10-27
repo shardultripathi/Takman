@@ -31,27 +31,30 @@ gamestate::gamestate(int N, int time, int player)
 	}
 	// hashKey ^= zobrist[i][j][k][l];
 
-	// std::random_device rd;
-	// std::mt19937_64 e2(rd());
-	// std::uniform_int_distribution<long long int> dist(std::llround(std::pow(2,61)), std::llround(std::pow(2,62)));
-	// hashKey = 0;
-	// zobrist = new uint64_t***[n];
-	// for (int i =0;i<n;i++)
-	// {
-	//    	zobrist[i] = new uint64_t**[n];
-	// 	for (int j = 0;j<n;j++){
-	// 		zobrist[i][j] = new uint64_t*[2*(myFlatstones)+myCapstones];
-	// 		for (int k = 0;k<2*(myFlatstones)+myCapstones;k++){
-	// 			zobrist[i][j][k] = new uint64_t[7];
-	// 			for (int l = 0;l<6;l++){
-	// 				zobrist[i][j][k][l] = dist(e2);
-	// 			}
-	// 		}
-	// 	}
-	// }
+	std::random_device rd;
+	std::mt19937_64 e2(rd());
+	std::uniform_int_distribution<long long int> dist(std::llround(std::pow(2,61)), std::llround(std::pow(2,62)));
+	hash = 0;
+	zobrist = new uint64_t***[n];
+	for (int i =0;i<n;i++)
+	{
+	   	zobrist[i] = new uint64_t**[n];
+		for (int j = 0;j<n;j++)
+		{
+			zobrist[i][j] = new uint64_t*[2*(myFlatstones)+myCapstones];
+			for (int k = 0;k<2*(myFlatstones)+myCapstones;k++)
+			{
+				zobrist[i][j][k] = new uint64_t[6];
+				for (int l = 0;l<6;l++)
+				{ /////////// 0 my flat, 1 my wall, 2 my cap, 3 opp flat, 4 opp wall, 5 opp cap
+					zobrist[i][j][k][l] = dist(e2);
+				}
+			}
+		}
+	}
 }
 
-void gamestate::update_board(string move, int player)
+void gamestate::update_board(string move, int player) //////// make changes for zobrist key
 {
 	int i,j;
 	int it,it2,stack_size,step;
@@ -163,7 +166,7 @@ void gamestate::update_board(string move, int player)
 }
 
 
-void gamestate::undo_move(string move, int player)
+void gamestate::undo_move(string move, int player) //////// make changes for zobrist key
 {
 	int i,j;
 	int it,it2,stack_size,step;
@@ -329,7 +332,7 @@ bool gamestate::road(int player)
 	return false;
 }
 
-int gamestate::over()
+int gamestate::over() ////////// make changes
 {
 	if (road(player_id))
 		return 1;
@@ -372,4 +375,32 @@ void gamestate::print_board() {
 		}
 		cerr<<"\n";
 	}
+}
+
+uint64_t gamestate::getHash()
+{
+	hash = 0;
+	int z = 0;
+	for (int i=0; i<n; i++)
+	{
+		for (int j=0; j<n; j++)
+		{
+			for (int k=0; k<height[i][j]; k++)
+			{
+			 /////////// 0 my flat, 1 my wall, 2 my cap, 3 opp flat, 4 opp wall, 5 opp cap
+				// switch(board[i][j][k]){
+				// 	case 1: z = 0; break;
+				// 	case 2: z = 1; break;
+				// 	case 3: z = 2; break;
+				// 	case -1: z = 3; break;
+				// 	case -2: z = 4; break;
+				// 	case -3: z = 5; break;
+				// 	default: break;
+				// }
+				z = (board[i][j][k] > 0) ? board[i][j][k] - 1 : -board[i][j][k] + 2;
+				hash ^= zobrist[i][j][k][z];
+			}
+		}
+	}
+	return hash;
 }

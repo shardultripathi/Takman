@@ -2,6 +2,11 @@
 #include "getmoves.h"
 #include "minimax.h"
 
+// #define neg	std::numeric_limits<int>::min()
+// #define pos	std::numeric_limits<int>::max()
+#define neg -100000
+#define pos 100000
+
 using namespace std;
 
 int player_id = 0;
@@ -13,8 +18,7 @@ vector<string> *movesptr;
 
 
 int main() {
-
-	srand(time(0));
+	
 	string str;
 	int temp,i,j,k;
 	char c;
@@ -54,7 +58,8 @@ int main() {
 		getline(cin,str);
 		game->update_board(str,1);
 
-		str =  value(game,3,0,-655360,655360,true).second;
+		// str =  value(game,3,0,neg,pos,true).second;
+		str = ids(game).second;
 			
 		cout<<str<<endl;
 		game->update_board(str,player_id);
@@ -83,11 +88,12 @@ int main() {
 		// 	break;
 
 		
-		if (count<7)
-			t =  value(game,4,0,-655360,655360,true);
-		else 
-			t =  value(game,5,0,-655360,655360,true);
-		// cerr<<"My move evaluation: "<<t.first<<endl;
+		// if (count<7)
+		// 	t =  value(game,5,0,neg,pos,true);
+		// else 
+		// 	t =  value(game,6,0,neg,pos,true);
+		t = ids(game);
+		cerr<<"My move evaluation: "<<(t.first)/10<<endl;
 			
 		// cerr<<str<<"\n";
 		str = t.second;
@@ -98,6 +104,8 @@ int main() {
 		// if (game->over() != 4)
 		// 	break;
 	}
+
+	// {"e1", "a5", "Fb5", "Cb4", "Fa2", "Fe3", "Fa3", "Fa4", "Fc4", "Fc5", "Fd5", "Fd4", "Fe5", "1b4>1", "1a5-1", "Fe2", "1b5>1", "2c4+2", "Ca5"}
 
 	// string strs[] = {"Fa1","Fa5","Fd4","Fd3","Fc4","Fd2","Fb4","Fc2","Fb5","Fe4","Fc5","1e4<1","Fd5","Fe5","Ce4","1e5<1"};
 	// int bla;
