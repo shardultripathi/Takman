@@ -4,8 +4,8 @@
 
 // #define neg	std::numeric_limits<int>::min()
 // #define pos	std::numeric_limits<int>::max()
-#define neg -1000000
-#define pos 1000000
+#define neg -100000
+#define pos 100000
 #define ttsize 102400000
 #define hsize 1123143
 
@@ -409,9 +409,9 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 	int color = maxNode ? 1:-1;
 	int game_over = game->over();
 	if (game_over == 1)
-		return maxNode?pos:neg;
+		return color*pos;
 	else if (game_over == -1)
-		return maxNode?neg:pos;
+		return color*neg;
 	else if (game_over == 2 || game_over == 3)
 		return color*flatwin(game);
 	else if (depth == 0)
@@ -475,14 +475,14 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 			bestmove = sorted_moves[i].first;
 		}
 		
-		if (v >= beta)
+		if (bestValue >= beta)
 		{
 			// cerr<<"akjhsfskdfhksjdhfjdhfksjhdkfjsdkfl"<<endl;
 			// cerr<<i<<endl;
-			// bestmove = sorted_moves[i].first;
+			bestmove = sorted_moves[i].first;
 			break;
 		}
-		alpha = std::max(alpha,v);
+		alpha = std::max(alpha,bestValue);
 	}
 
 	hell:
