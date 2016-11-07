@@ -33,18 +33,4 @@ class gamestate
 	int over();
 	void print_board();
 	uint64_t getHash();
-	// bool operator==(const gamestate&b) {
- //            if (hash != b.hash)
- //                return false;
- //            for (int i = 0; i < n; i++)
- //                for (int j = 0; j < n; j++) {
- //                    if (height[i][j] != b.height[i][j])
- //                        return false;
- //                    for (int k = 0; k < height[i][j]; k++)
- //                        if (board[i][j][k] != b.board[i][j][k])
- //                            return false;
- //                }
- //            return true;
- //        }
-	// uint64_t getHash() const { return hash; }
 };

@@ -13,10 +13,6 @@ int player_id = 0;
 int n = 0;
 int tl = 0;
 
-vector<string> moves;
-vector<string> *movesptr;
-
-
 int main() {
 	
 	string str;
@@ -42,9 +38,9 @@ int main() {
 		i++;
 	}
 
+	auto start = std::chrono::system_clock::now();
 
 	gamestate *game = new gamestate(n,tl,player_id);
-	movesptr = &moves;
 
 	/////////////////////////////////////////
 	
@@ -58,7 +54,6 @@ int main() {
 		getline(cin,str);
 		game->update_board(str,1);
 
-		// str =  value(game,3,0,neg,pos,true).second;
 		str = ids(game).second;
 			
 		cout<<str<<endl;
@@ -84,25 +79,11 @@ int main() {
 		getline(cin,str); count++;
 		game->update_board(str,opp);
 
-		// if (game->over() != 4)
-		// 	break;
-
-		
-		// if (count<7)
-		// 	t =  value(game,5,0,neg,pos,true);
-		// else 
-		// 	t =  value(game,6,0,neg,pos,true);
 		t = ids(game);
-		cerr<<"My move evaluation: "<<(t.first)/10<<endl;
-			
-		// cerr<<str<<"\n";
+
 		str = t.second;
 		cout<<str<<endl;
-		// cerr<<endl;
 		game->update_board(str,player_id);
-		// game->print_board();
-		// if (game->over() != 4)
-		// 	break;
 	}
 
 	// {"e1", "a5", "Fb5", "Cb4", "Fa2", "Fe3", "Fa3", "Fa4", "Fc4", "Fc5", "Fd5", "Fd4", "Fe5", "1b4>1", "1a5-1", "Fe2", "1b5>1", "2c4+2", "Ca5"}
@@ -163,7 +144,5 @@ int main() {
 
 	// }
 	
-
-
 	return 0;
 }
