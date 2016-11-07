@@ -6,23 +6,30 @@
 // #define pos	std::numeric_limits<int>::max()
 #define neg -100000
 #define pos 100000
-#define ttsize 102400000
+#define ttsize 102471123
 #define hsize 1123143
+
+#define fc 100
+#define cs 75
+#define w 29
+#define c 10
+#define ccap 12
+#define s 15
+#define inf 15
 
 using namespace std;
 
-int f = 100; int cs = 70; int w = 30;
-int c = 10; int ccap = 12;
-int s = 15;
-int inf = 10;
 int height;
-int i_ngb, j_ngb;
+int i_ngb, j_ngb, h_ngb;
+int i_lcrt,i_rcrt;
+int j_lcrt,j_rcrt;
 int peice, opp_peice;
 
 vector<pair<int,int> > neighbours;	///////////////////////////////
 vector<string> d_moves;
 int dmoves_size;
 
+int nodes = 0;
 int flatcount = 0;
 int centre_control = 0;
 int stack_color = 0;
@@ -33,6 +40,21 @@ int row = 0; int col = 0;
 int row_influence = 0; int col_influence = 0;
 
 int influence_table[5][5];	///////////////////////////////////
+
+int infl[7][7] =
+    {
+//    	  0  1  2  3  -1  -2  -3
+         {0, 0, 0, 0,  0,  0, 0},
+         {1, 2, 0, 0,  1,  0, 0},
+         {1, 1, 0, 0,  1,  0, 0},
+         {1, 1, 1, 0,  1,  1, 0},
+         {-1,-1,0, 0, -2,  0, 0},
+         {-1,-1,0, 0, -1,  0, 0},
+         {-1,-1,-1,0, -1, -1, 0}
+    };
+    //0,1,2,3 -> 0,1,2,3
+    //-1->4 , -2->5, -3->6
+    //p<0?-p+3:p
 
 struct evalInfo 
 {
@@ -91,16 +113,16 @@ int eval(gamestate* game)
 			peice = game->board[i][j][height-1];
 			switch(peice)
 			{
-				case 1: flatcount += f; if (i>=2 && i<=4 && j>=2 && j<=4) centre_control += c; break;
-				case -1: flatcount -= f; if (i>=2 && i<=4 && j>=2 && j<=4) centre_control -= c; break;
+				case 1: flatcount += fc; if (i>0 && i<n-1 && j>0 && j<n-1) centre_control += c; break;
+				case -1: flatcount -= fc; if (i>0 && i<n-1 && j>0 && j<n-1) centre_control -= c; break;
 				case 2: flatcount += w; break;
 				case -2: flatcount -= w; break;
-				case 3: flatcount += cs; if (i>=2 && i<=4 && j>=2 && j<=4) centre_control += ccap; break;
-				case -3: flatcount -= cs; if (i>=2 && i<=4 && j>=2 && j<=4) centre_control -= ccap; break;
+				case 3: flatcount += cs; if (i>0 && i<n-1 && j>0 && j<n-1) centre_control += ccap; break;
+				case -3: flatcount -= cs; if (i>0 && i<n-1 && j>0 && j<n-1) centre_control -= ccap; break;
 				default: break;
 			}
 
-			if (height > 1)
+			if (height > 1) //// stack
 			{
 				stack = 0;
 				mycolor = 0;
@@ -122,45 +144,109 @@ int eval(gamestate* game)
 				else stack -= (stack>0)?s:3*s;
 				stack_color += stack;
 
-				if (mycolor>=1 && peice > 0)
+				if (mycolor>0 && peice > 0)
 				{
-					// v.clear();
+					neighbours.clear();
 					game->getNeighbours(i,j,mycolor+1,neighbours);
+					i_lcrt = -1;
+					i_rcrt = n;
+					j_lcrt = -1;
+					j_rcrt = n;
 					for (int k=0; k<neighbours.size(); k++)
 					{
 						i_ngb = neighbours[k].first;
 						j_ngb = neighbours[k].second;
+						if (!((i_ngb>i_lcrt && i_ngb<i_rcrt)&&(j_ngb>j_lcrt && j_ngb<j_rcrt))) continue;
 						opp_peice = game->board[i_ngb][j_ngb][game->height[i_ngb][j_ngb]-1];
 						if (peice==1 || peice==2)
 						{
 							if (opp_peice!=-3 && opp_peice!=-2)
 								influence_table[i_ngb][j_ngb]++;
+							else
+							{
+								influence_table[i_ngb][j_ngb]-=2;
+								(i_ngb<i ? i_lcrt:i_rcrt) = i_ngb;
+								(j_ngb<i ? j_lcrt:j_rcrt) = j_ngb;
+							}
 						}
 						else
 						{
-							if (opp_peice!=-3)
+							if (opp_peice==-3)
+							{
+								influence_table[i_ngb][j_ngb]-=2;
+								(i_ngb<i ? i_lcrt:i_rcrt) = i_ngb;
+								(j_ngb<i ? j_lcrt:j_rcrt) = j_ngb;
+							}
+							else if(opp_peice==-2)
+							{
+								if (game->board[i][j][height-2]<0)
+								{
+									influence_table[i_ngb][j_ngb]-=2;
+									(i_ngb<i ? i_lcrt:i_rcrt) = i_ngb;
+									(j_ngb<i ? j_lcrt:j_rcrt) = j_ngb;		
+								}
+								else
+								{
+									influence_table[i_ngb][j_ngb]++;
+									(i_ngb<i ? i_lcrt:i_rcrt) = i_ngb;
+									(j_ngb<i ? j_lcrt:j_rcrt) = j_ngb;
+								}
+							}
+							else
 								influence_table[i_ngb][j_ngb]++;
 						}
 					}
 					
 				}
-				if (oppcolor>=1 && peice < 0)
+				if (oppcolor>0 && peice < 0)
 				{
-					// neighbours.clear();
+					neighbours.clear();
 					game->getNeighbours(i,j,oppcolor+1,neighbours);
+					i_lcrt = -1;
+					i_rcrt = n;
+					j_lcrt = -1;
+					j_rcrt = n;
 					for (int k=0; k<neighbours.size(); k++)
 					{
 						i_ngb = neighbours[k].first;
 						j_ngb = neighbours[k].second;
+						if (!((i_ngb>i_lcrt && i_ngb<i_rcrt)&&(j_ngb>j_lcrt && j_ngb<j_rcrt))) continue;
 						opp_peice = game->board[i_ngb][j_ngb][game->height[i_ngb][j_ngb]-1];
 						if (peice==-1 || peice==-2)
 						{
 							if (opp_peice!=3 && opp_peice!=2)
 								influence_table[i_ngb][j_ngb]--;
+							else
+							{
+								influence_table[i_ngb][j_ngb]+=2;
+								(i_ngb<i ? i_lcrt:i_rcrt) = i_ngb;
+								(j_ngb<i ? j_lcrt:j_rcrt) = j_ngb;
+							}
 						}
 						else
 						{
-							if (opp_peice!=3)
+							if (opp_peice==3)
+							{
+								influence_table[i_ngb][j_ngb]+=2;
+								(i_ngb<i ? i_lcrt:i_rcrt) = i_ngb;
+								(j_ngb<i ? j_lcrt:j_rcrt) = j_ngb;
+							}
+							else if(opp_peice==2)
+							{
+								if (game->board[i][j][height-2]>0)
+								{
+									influence_table[i_ngb][j_ngb]+=2;
+									(i_ngb<i ? i_lcrt:i_rcrt) = i_ngb;
+									(j_ngb<i ? j_lcrt:j_rcrt) = j_ngb;		
+								}
+								else
+								{
+									influence_table[i_ngb][j_ngb]--;
+									(i_ngb<i ? i_lcrt:i_rcrt) = i_ngb;
+									(j_ngb<i ? j_lcrt:j_rcrt) = j_ngb;
+								}
+							}
+							else
 								influence_table[i_ngb][j_ngb]--;
 						}
 					}
@@ -170,44 +256,17 @@ int eval(gamestate* game)
 			}
 			if (height==1)
 			{
-				// v.clear();
+				neighbours.clear();
 				peice = game->board[i][j][0];
 				game->getNeighbours(i,j,1,neighbours);
 				for (int k=0; k<neighbours.size(); k++)
 				{
 					i_ngb = neighbours[k].first;
 					j_ngb = neighbours[k].second;
-					opp_peice = game->board[i_ngb][j_ngb][game->height[i_ngb][j_ngb]-1];
-					if (peice==1 || peice==2)
-					{
-						if (opp_peice==1)
-							influence_table[i_ngb][j_ngb]+=2;
-						else if(opp_peice==-1 || opp_peice==0 || opp_peice==2)
-							influence_table[i_ngb][j_ngb]++;
-						if (opp_peice!=-3 && opp_peice!=-2)
-							influence_table[i_ngb][j_ngb]++;
-					}
-					else if (peice==3)
-					{
-						if (opp_peice>0)
-							influence_table[i_ngb][j_ngb]+=2;
-						else if (opp_peice==-1 || opp_peice==-2 || opp_peice==0)
-							influence_table[i_ngb][j_ngb]++;
-					}
-					if (peice==-1 || peice==-2)
-					{
-						if (opp_peice==-1)
-							influence_table[i_ngb][j_ngb]-=2;
-						else if(opp_peice==1 || opp_peice==0 || opp_peice==-2)
-							influence_table[i_ngb][j_ngb]--;
-					}
-					else if (peice==-3)
-					{
-						if (opp_peice<0)
-							influence_table[i_ngb][j_ngb]-=2;
-						else if (opp_peice==1 || opp_peice==2 || opp_peice==0)
-							influence_table[i_ngb][j_ngb]--;
-					}
+					h_ngb = game->height[i_ngb][j_ngb];
+					opp_peice = h_ngb>0?game->board[i_ngb][j_ngb][h_ngb-1]:0;
+
+					influence_table[i_ngb][j_ngb] += infl[peice<0?-peice+3:peice][opp_peice<0?-opp_peice+3:opp_peice];
 				}			
 			}
 		}
@@ -242,7 +301,7 @@ int eval(gamestate* game)
 			col_influence -= 2*inf*col;
 	}
 
-	return (8*flatcount + centre_control + 3*stack_color + 2*total_influence + 7*row_influence/2 + 7*col_influence/2);
+	return (8*flatcount + centre_control + 2*stack_color + 2*total_influence + 7*row_influence/2 + 7*col_influence/2);
 	// return (8*flatcount + centre_control + 3*stack_color)/10;
 }
 
@@ -259,6 +318,11 @@ inline int min_val(int a, int b)
 bool myComparison(const pair<string,int> &a,const pair<string,int> &b)
 {
 	return a.second>b.second;
+	// if (a.second > b.second)
+	// 	return true;
+	// else if (a.second == b.second && b.first[0]=='S')
+	// 	return true;
+	// else return false;
 }
 bool myComparison2(const pair<string,int> &a,const pair<string,int> &b)
 {
@@ -361,22 +425,30 @@ int mtdf (gamestate* game, int f, int d)
 pair<int,string> ids(gamestate* game)
 {
 	ttable.clear();
+	history.clear();
+	// nodes = 0;
 	static int count = 0;
-	static int dlimit;
-	if (count<7) dlimit = 6; else dlimit = 7;
+	static int dlimit = 6;
+	// if (count<7) dlimit = 6; else dlimit = 7;
 	int guess = 0;
+	int tm;
 	string move;
 
 	for (int d=1; d<=dlimit; d++)
 	{
+		nodes = 0;
 		cerr<<"depth: "<<d;
-		guess = mtdf(game,guess,d);
+		// guess = mtdf(game,guess,d);
 		// guess = abtt(game,neg,pos,d,true);
-		// guess = negamax(game,neg,pos,d,true);
-
+		auto start = std::chrono::system_clock::now();
+		guess = negamax(game,neg,pos,d,true);
+		auto end = std::chrono::system_clock::now();
+		tm = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()/1000;
 		move = (&(ttable.find(game->getHash())->second))->bmove;
 		cerr<<" abttmove: "<<move;
-		cerr<<" val: "<<guess/10<<endl;
+		cerr<<" val: "<<guess/10;
+		cerr<<" time: "<<tm;
+		cerr<<" branching: "<<pow(nodes,1.0/(d+1))<<endl;
 	}
 	count++;
 	return make_pair(guess,move);
@@ -384,7 +456,7 @@ pair<int,string> ids(gamestate* game)
 
 int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 {
-	// cerr<<"yahan"<<endl;
+	nodes++;
 	int alphaOrig = alpha;
 	auto entry = ttable.find(game->getHash());
 	evalInfo* info;
@@ -404,7 +476,7 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 			if (alpha >= beta)
 				return info->value;
 		}
-		// bestmove = info->bmove;
+		bestmove = info->bmove;
 	}
 	int color = maxNode ? 1:-1;
 	int game_over = game->over();
@@ -427,18 +499,10 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 	vector<pair<string,int> > sorted_moves;
 		for (int i=0; i<moves_size; i++)
 		{
-			// game->update_board(moves[i],player);
-			// localW2F = game->wallToFlat;
-			// v = eval(game);
-			// game->wallToFlat = localW2F;
-			// game->undo_move(moves[i],player);
 			v = history[moves[i]];
-			// cerr<<"historyyyyyyyyyy: "<<v<<endl;
 			sorted_moves.push_back(make_pair(moves[i],v));
 		}
-	// cerr<<"outttttaaaa here"<<endl;
 	sort(sorted_moves.begin(),sorted_moves.end(),myComparison);
-	// cerr<<"sorted"<<endl;
 
 	// if (bestmove != "") /////best move first
 	// {
@@ -468,7 +532,6 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 		game->wallToFlat = localW2F;
 		game->undo_move(sorted_moves[i].first,player);
 
-		// best = max_val(value,best);
 		if (v > bestValue)
 		{
 			bestValue = v;
@@ -477,9 +540,8 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 		
 		if (bestValue >= beta)
 		{
-			// cerr<<"akjhsfskdfhksjdhfjdhfksjhdkfjsdkfl"<<endl;
+			// bestmove = sorted_moves[i].first;
 			// cerr<<i<<endl;
-			bestmove = sorted_moves[i].first;
 			break;
 		}
 		alpha = std::max(alpha,bestValue);
@@ -487,7 +549,7 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 
 	hell:
 	history[bestmove] += pow(2,depth);
-	// cerr<<"updated history score"<<endl;
+	// history[bestmove] += depth*depth;
 	if (bestValue <= alphaOrig)
 		storeEntry(game->getHash(),bestValue,upperbound,depth,bestmove);
 	else if (bestValue >= beta)
@@ -496,6 +558,11 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 		storeEntry(game->getHash(),bestValue,exact,depth,bestmove);
 	return bestValue;
 }
+
+// int pvs (gamestate* game, int alpha, int beta, int depth, bool maxNode)
+// {
+
+// }
 
 // int abtt (gamestate* game, int alpha, int beta, int depth, bool maxNode)
 // {
