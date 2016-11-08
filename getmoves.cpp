@@ -100,9 +100,9 @@ void move_stack(int i, int j, int total, int direction, string str, int top,vect
 	switch(direction) {
 		case 0: if(i==n-1) 
 					return;
-				if(abs(game->board[i+1][j][game->height[i+1][j] - 1] ) == 3)
+				if(game->height[i+1][j] > 0 && abs(game->board[i+1][j][game->height[i+1][j] - 1] ) == 3)
 					return;
-				if(abs(game->board[i+1][j][game->height[i+1][j] - 1] ) == 2) {
+				if(game->height[i+1][j] > 0 && abs(game->board[i+1][j][game->height[i+1][j] - 1] ) == 2) {
 					if(top==3 && total==1) {
 						move_stack(i+1,j,0,direction,str+to_string(total),top,moves,game);					
 					}
@@ -115,9 +115,9 @@ void move_stack(int i, int j, int total, int direction, string str, int top,vect
 
 		case 1: if(i==0) 
 					return;
-				if(abs(game->board[i-1][j][game->height[i-1][j] - 1] ) == 3)
+				if(game->height[i-1][j] > 0 && abs(game->board[i-1][j][game->height[i-1][j] - 1] ) == 3)
 					return;
-				if(abs(game->board[i-1][j][game->height[i-1][j] - 1] ) == 2) {
+				if(game->height[i-1][j] > 0 && abs(game->board[i-1][j][game->height[i-1][j] - 1] ) == 2) {
 					if(top==3 && total==1) {
 						move_stack(i-1,j,0,direction,str+to_string(total),top,moves,game);					
 					}
@@ -130,9 +130,9 @@ void move_stack(int i, int j, int total, int direction, string str, int top,vect
 
 		case 2: if(j==n-1) 
 					return;
-				if(abs(game->board[i][j+1][game->height[i][j+1] - 1] ) == 3)
+				if(game->height[i][j+1] > 0 && abs(game->board[i][j+1][game->height[i][j+1] - 1] ) == 3)
 					return;
-				if(abs(game->board[i][j+1][game->height[i][j+1] - 1] ) == 2) {
+				if(game->height[i][j+1] > 0 && abs(game->board[i][j+1][game->height[i][j+1] - 1] ) == 2) {
 					if(top==3 && total==1) {
 						move_stack(i,j+1,0,direction,str+to_string(total),top,moves,game);					
 				}
@@ -145,9 +145,9 @@ void move_stack(int i, int j, int total, int direction, string str, int top,vect
 
 		default: if(j==0) 
 					return;
-				if(abs(game->board[i][j-1][game->height[i][j-1] - 1] ) == 3)
+				if(game->height[i][j-1] > 0 && abs(game->board[i][j-1][game->height[i][j-1] - 1] ) == 3)
 					return;
-				if(abs(game->board[i][j-1][game->height[i][j-1] - 1] ) == 2) {
+				if(game->height[i][j-1] > 0 && abs(game->board[i][j-1][game->height[i][j-1] - 1] ) == 2) {
 					if(top==3 && total==1) {
 						move_stack(i,j-1,0,direction,str+to_string(total),top,moves,game);					
 					}

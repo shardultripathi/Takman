@@ -56,7 +56,8 @@ gamestate::gamestate(int N, int time, int player)
 
 void gamestate::update_board(string move, int player) //////// make changes for zobrist key
 {
-	int i,j;
+
+	int i,j,z;
 	int it,it2,stack_size,step;
 	int sign = (player==player_id)? 1:-1;
 	wallToFlat = false;
@@ -68,6 +69,7 @@ void gamestate::update_board(string move, int player) //////// make changes for 
 				  j = move[2] - '1';
 				  board[i][j][height[i][j]] = sign*1;
 				  height[i][j]++;
+				  hash ^= zobrist[i][j][0][-3*(sign-1)/2];
 				  if (sign==1) myFlatstones--; else otherFlatstones--;
 				  break;
 		case 'S': 
@@ -76,6 +78,7 @@ void gamestate::update_board(string move, int player) //////// make changes for 
 				  j = move[2] - '1';
 				  board[i][j][height[i][j]] = sign*2;
 				  height[i][j]++;
+				  hash ^= zobrist[i][j][0][(5-3*sign)/2];
 				  if (sign==1) myFlatstones--; else otherFlatstones--;
 				  break;
 		case 'C': 
@@ -84,10 +87,12 @@ void gamestate::update_board(string move, int player) //////// make changes for 
 				  j = move[2] - '1';
 				  board[i][j][height[i][j]] = sign*3;
 				  height[i][j]++;
+				  hash ^= zobrist[i][j][0][(7-3*sign)/2];
 				  if (sign==1) myCapstones--; else otherCapstones--;
 				  break;
 		default: 
 		// cerr<<move<<" oStack\n";
+				// cerr<<"update "<<move<<endl;
 				 stack_size = move[0] - '0';
 				 i = move[1] - 'a';
 				 j = move[2] - '1';
@@ -95,13 +100,20 @@ void gamestate::update_board(string move, int player) //////// make changes for 
 				 switch(move[3]) {
 				 	case '>': if(move[move.length() - 1]=='1' && abs(board[i][j][height[i][j] + stack_size - 1])==3 && abs(board[i+move.length() - 4][j][height[i+move.length() - 4][j] - 1])==2) {
 				 				wallToFlat = true;
+				 				z = (board[i+move.length() - 4][j][height[i+move.length() - 4][j] - 1] > 0) ? 1:4;
 				 				board[i+move.length() - 4][j][height[i+move.length() - 4][j] - 1] /= 2;
+				 				hash ^= zobrist[i+move.length() - 4][j][height[i+move.length() - 4][j] - 1][z];
+				 				hash ^= zobrist[i+move.length() - 4][j][height[i+move.length() - 4][j] - 1][z-1];
 				 			  }
 				 			  for(it=4;it<move.length();it++) {
 				 				step = move[it] - '0';
 				 				it2 = step;
 				 				while(it2>0) {
+				 					
 				 					board[i+it-3][j][height[i+it-3][j] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
+				 					z = (board[i][j][height[i][j] + it2 - 1] > 0) ? board[i][j][height[i][j] + it2 - 1] - 1 : 2 - board[i][j][height[i][j] + it2 - 1];
+				 					hash ^= zobrist[i][j][height[i][j] + it2 - 1][z];
+				 					hash ^= zobrist[i+it-3][j][height[i+it-3][j] + it2 - 1][z];
 				 					board[i][j][height[i][j] + it2 - 1] = 0;
 				 					it2--;
 				 				}
@@ -112,13 +124,20 @@ void gamestate::update_board(string move, int player) //////// make changes for 
 				 			  
 				 	case '<': if(move[move.length() - 1]=='1' && abs(board[i][j][height[i][j] + stack_size - 1])==3 && abs(board[i-move.length() + 4][j][height[i-move.length() + 4][j] - 1])==2) {
 				 				wallToFlat = true;
+				 				z = (board[i-move.length()+4][j][height[i-move.length()+4][j] - 1] > 0) ? 1:4;
 				 				board[i-move.length() + 4][j][height[i-move.length() + 4][j] - 1] /= 2;
+				 				hash ^= zobrist[i-move.length()+4][j][height[i-move.length()+4][j] -1][z];
+				 				hash ^= zobrist[i-move.length()+4][j][height[i-move.length()+4][j] -1][z-1];
+
 				 			  }
 				 			  for(it=4;it<move.length();it++) {
 				 				step = move[it] - '0';
 				 				it2 = step;
 				 				while(it2>0) {
 				 					board[i-it+3][j][height[i-it+3][j] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
+				 					z = (board[i][j][height[i][j] + it2 - 1] > 0) ? board[i][j][height[i][j] + it2 - 1] - 1 : 2 - board[i][j][height[i][j] + it2 - 1];
+				 					hash ^= zobrist[i][j][height[i][j] + it2 - 1][z];
+				 					hash ^= zobrist[i-it+3][j][height[i-it+3][j] + it2 - 1][z];
 				 					board[i][j][height[i][j] + it2 - 1] = 0;
 				 					it2--;
 				 				}
@@ -129,13 +148,19 @@ void gamestate::update_board(string move, int player) //////// make changes for 
 
 				 	case '+': if(move[move.length() - 1]=='1' && abs(board[i][j][height[i][j] + stack_size - 1])==3 && abs(board[i][j+move.length() - 4][height[i][j+move.length() - 4] - 1])==2) {
 				 				wallToFlat = true;
+				 				z = (board[i][j+move.length() - 4][height[i][j+move.length() - 4] - 1] > 0)? 1:4;
 				 				board[i][j+move.length() - 4][height[i][j+move.length() - 4] - 1] /= 2;
+				 				hash ^= zobrist[i][j+move.length() - 4][height[i][j+move.length() - 4] - 1][z];
+				 				hash ^= zobrist[i][j+move.length() - 4][height[i][j+move.length() - 4] - 1][z-1];
 				 			  }
 				 			  for(it=4;it<move.length();it++) {
 				 				step = move[it] - '0';
 				 				it2 = step;
 				 				while(it2>0) {
 				 					board[i][j+it-3][height[i][j+it-3] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
+				 					z = (board[i][j][height[i][j] + it2 - 1] > 0) ? board[i][j][height[i][j] + it2 - 1] - 1 : 2 - board[i][j][height[i][j] + it2 - 1];
+				 					hash ^= zobrist[i][j][height[i][j] + it2 - 1][z];
+				 					hash ^= zobrist[i][j+it-3][height[i][j+it-3] + it2 - 1][z];
 				 					board[i][j][height[i][j] + it2 - 1] = 0;
 				 					it2--;
 				 				}
@@ -146,13 +171,19 @@ void gamestate::update_board(string move, int player) //////// make changes for 
 				 			  
 				 	default: if(move[move.length() - 1]=='1' && abs(board[i][j][height[i][j] + stack_size - 1])==3 && abs(board[i][j-move.length() + 4][height[i][j-move.length() + 4] - 1])==2) {
 				 				wallToFlat = true;
+				 				z = (board[i][j-move.length() + 4][height[i][j-move.length() + 4] - 1] > 0) ? 1:4;
 				 				board[i][j-move.length() + 4][height[i][j-move.length() + 4] - 1] /= 2;
+				 				hash ^= zobrist[i][j-move.length() + 4][height[i][j-move.length() + 4] - 1][z];
+				 				hash ^= zobrist[i][j-move.length() + 4][height[i][j-move.length() + 4] - 1][z-1];
 				 			  }
 				 			  for(it=4;it<move.length();it++) {
 				 				step = move[it] - '0';
 				 				it2 = step;
 				 				while(it2>0) {
 				 					board[i][j-it+3][height[i][j-it+3] + it2 - 1] = board[i][j][height[i][j] + it2 - 1];
+				 					z = (board[i][j][height[i][j] + it2 - 1] > 0) ? board[i][j][height[i][j] + it2 - 1] - 1 : 2 - board[i][j][height[i][j] + it2 - 1];
+				 					hash ^= zobrist[i][j][height[i][j] + it2 - 1][z];
+				 					hash ^= zobrist[i][j-it+3][height[i][j-it+3] + it2 - 1][z];
 				 					board[i][j][height[i][j] + it2 - 1] = 0;
 				 					it2--;
 				 				}
@@ -163,18 +194,22 @@ void gamestate::update_board(string move, int player) //////// make changes for 
 				 }
 				 height[i][j] -= stack_size;
 	}
+	// print_board();
 }
 
 
 void gamestate::undo_move(string move, int player) //////// make changes for zobrist key
 {
-	int i,j;
+	
+	int i,j,z;
 	int it,it2,stack_size,step;
 	int sign = (player==player_id)? 1:-1;
 	if(isalpha(move[0])) {
 		i = move[1] - 'a';
 		j = move[2] - '1';
-		board[i][j][height[i][j]] = 0;
+		z = (board[i][j][height[i][j]-1]>0) ? (board[i][j][height[i][j] - 1] - 1):(2 - board[i][j][height[i][j] - 1]);
+		board[i][j][height[i][j]-1] = 0;
+		hash ^= zobrist[i][j][height[i][j]-1][z];
 		height[i][j]--;
 		if(move[0]=='C')
 			if (sign==1) myCapstones++; else otherCapstones++;
@@ -182,6 +217,7 @@ void gamestate::undo_move(string move, int player) //////// make changes for zob
 			if (sign==1) myFlatstones++; else otherFlatstones++;
 				  
 	} else {
+		// cerr<<"undo "<<move<<endl;
 		stack_size = move[0] - '0';
 		i = move[1] - 'a';
 		j = move[2] - '1';
@@ -192,14 +228,21 @@ void gamestate::undo_move(string move, int player) //////// make changes for zob
 				 		it2 = step;
 						while(it2>0) {
 	 						board[i][j][height[i][j] - it2] = board[i+it-3][j][height[i+it-3][j] - it2];
-	 						board[i+it-3][j][height[i+it-3][j] - it2] = 0;
+	 						z = (board[i][j][height[i][j] - it2] > 0) ? board[i][j][height[i][j] - it2] - 1 : 2 - board[i][j][height[i][j] - it2];
+				 			hash ^= zobrist[i][j][height[i][j] - it2][z];
+				 			hash ^= zobrist[i+it-3][j][height[i+it-3][j] - it2][z];
+				 			board[i+it-3][j][height[i+it-3][j] - it2] = 0;
 				 			it2--;
 						}
 				 		height[i][j] -= step;
 				 		height[i+it-3][j] -= step;
 	 				  }
-	 				  if(wallToFlat)
+	 				  if(wallToFlat) {
 	 				  	board[i+move.length() - 4][j][height[i+move.length() - 4][j] - 1] *= 2;
+	 				  	z = (board[i+move.length() - 4][j][height[i+move.length() - 4][j] - 1] > 0)?1:4;
+	 				  	hash ^= zobrist[i+move.length() - 4][j][height[i+move.length() - 4][j] - 1][z];
+	 				  	hash ^= zobrist[i+move.length() - 4][j][height[i+move.length() - 4][j] - 1][z-1];
+	 				  }
 				 	  break;
 				 			  
 			case '<': for(it=move.length()-1;it>=4;it--) {
@@ -207,14 +250,21 @@ void gamestate::undo_move(string move, int player) //////// make changes for zob
 		 				it2 = step;
 				 		while(it2>0) {
 				 			board[i][j][height[i][j] - it2] = board[i-it+3][j][height[i-it+3][j] - it2];
-							board[i-it+3][j][height[i-it+3][j] - it2] = 0;
+							z = (board[i][j][height[i][j] - it2] > 0) ? board[i][j][height[i][j] - it2] - 1 : 2 - board[i][j][height[i][j] - it2];
+				 			hash ^= zobrist[i][j][height[i][j] - it2][z];
+				 			hash ^= zobrist[i-it+3][j][height[i-it+3][j] - it2][z];
+				 			board[i-it+3][j][height[i-it+3][j] - it2] = 0;
 		 					it2--;
 			 			}
 				 		height[i][j] -= step;
 						height[i-it+3][j] -= step;
 		 			  }
-		 			  if(wallToFlat)
+		 			  if(wallToFlat) {
 		 			  	board[i-move.length() + 4][j][height[i-move.length() + 4][j] - 1] *= 2;
+		 			  	z = (board[i-move.length() + 4][j][height[i-move.length() + 4][j] - 1] > 0)?1:4;
+	 				  	hash ^= zobrist[i-move.length() + 4][j][height[i-move.length() + 4][j] - 1][z];
+	 				  	hash ^= zobrist[i-move.length() + 4][j][height[i-move.length() + 4][j] - 1][z-1];
+		 			  }
 		 			  break;
 
 			case '+': for(it=move.length()-1;it>=4;it--) {
@@ -222,14 +272,21 @@ void gamestate::undo_move(string move, int player) //////// make changes for zob
 				 		it2 = step;
 		 				while(it2>0) {
 							board[i][j][height[i][j] - it2] = board[i][j+it-3][height[i][j+it-3] - it2];
+				 			z = (board[i][j][height[i][j] - it2] > 0) ? board[i][j][height[i][j] - it2] - 1 : 2 - board[i][j][height[i][j] - it2];
+				 			hash ^= zobrist[i][j][height[i][j] - it2][z];
+				 			hash ^= zobrist[i][j+it-3][height[i][j+it-3] - it2][z];
 				 			board[i][j+it-3][height[i][j+it-3] - it2] = 0;
 				 			it2--;
 						}
 		 				height[i][j] -= step;
 		 				height[i][j+it-3] -= step;
 				 	  }
-				 	  if(wallToFlat)
+				 	  if(wallToFlat) {
 				 	  	board[i][j+move.length() - 4][height[i][j+move.length() - 4] - 1] *= 2;
+				 	  	z = (board[i][j+move.length() - 4][height[i][j+move.length() - 4] - 1] > 0)?1:4;
+	 				  	hash ^= zobrist[i][j+move.length() - 4][height[i][j+move.length() - 4] - 1][z];
+	 				  	hash ^= zobrist[i][j+move.length() - 4][height[i][j+move.length() - 4] - 1][z-1];
+				 	  }
 					  break;
 				 			  
 		 	default: for(it=move.length()-1;it>=4;it--) {
@@ -237,18 +294,27 @@ void gamestate::undo_move(string move, int player) //////// make changes for zob
 				 		it2 = step;
 						while(it2>0) {
 		 					board[i][j][height[i][j] - it2] = board[i][j-it+3][height[i][j-it+3] - it2];
+				 			z = (board[i][j][height[i][j] - it2] > 0) ? board[i][j][height[i][j] - it2] - 1 : 2 - board[i][j][height[i][j] - it2];
+				 			hash ^= zobrist[i][j][height[i][j] - it2][z];
+				 			hash ^= zobrist[i][j-it+3][height[i][j-it+3] - it2][z];
 				 			board[i][j-it+3][height[i][j-it+3] - it2] = 0;
 				 			it2--;
 						}
 		 				height[i][j] -= step;
 		 				height[i][j-it+3] -= step;
 				 	  }
-				 	  if(wallToFlat)
+				 	  if(wallToFlat) {
 				 	  	board[i][j-move.length() + 4][height[i][j-move.length() + 4] - 1] *= 2;
+				 	  	z = (board[i][j-move.length() + 4][height[i][j-move.length() + 4] - 1] > 0)?1:4;
+	 				  	hash ^= zobrist[i][j-move.length() + 4][height[i][j-move.length() + 4] - 1][z];
+	 				  	hash ^= zobrist[i][j-move.length() + 4][height[i][j-move.length() + 4] - 1][z-1];
+				 	  }
 				 			  
 		}
 		height[i][j] += stack_size;
 	}
+
+	// print_board();
 }
 
 void gamestate::getNeighbours(int i, int j, int len, vector<pair<int,int> > &neighbours)
@@ -379,28 +445,34 @@ void gamestate::print_board() {
 
 uint64_t gamestate::getHash()
 {
-	hash = 0;
-	int z = 0;
-	for (int i=0; i<n; i++)
-	{
-		for (int j=0; j<n; j++)
-		{
-			for (int k=0; k<height[i][j]; k++)
-			{
-			 /////////// 0 my flat, 1 my wall, 2 my cap, 3 opp flat, 4 opp wall, 5 opp cap
-				// switch(board[i][j][k]){
-				// 	case 1: z = 0; break;
-				// 	case 2: z = 1; break;
-				// 	case 3: z = 2; break;
-				// 	case -1: z = 3; break;
-				// 	case -2: z = 4; break;
-				// 	case -3: z = 5; break;
-				// 	default: break;
-				// }
-				z = (board[i][j][k] > 0) ? board[i][j][k] - 1 : -board[i][j][k] + 2;
-				hash ^= zobrist[i][j][k][z];
-			}
-		}
-	}
+	// hash2 = 0;
+	// int z = 0;
+	// for (int i=0; i<n; i++)
+	// {
+	// 	for (int j=0; j<n; j++)
+	// 	{
+	// 		for (int k=0; k<height[i][j]; k++)
+	// 		{
+	// 		 /////////// 0 my flat, 1 my wall, 2 my cap, 3 opp flat, 4 opp wall, 5 opp cap
+	// 			// switch(board[i][j][k]){
+	// 			// 	case 1: z = 0; break;
+	// 			// 	case 2: z = 1; break;
+	// 			// 	case 3: z = 2; break;
+	// 			// 	case -1: z = 3; break;
+	// 			// 	case -2: z = 4; break;
+	// 			// 	case -3: z = 5; break;
+	// 			// 	default: break;
+	// 			// }
+	// 			z = (board[i][j][k] > 0) ? board[i][j][k] - 1 : -board[i][j][k] + 2;
+	// 			hash2 ^= zobrist[i][j][k][z];
+	// 		}
+	// 	}
+	// }
+	// if(hash2!=hash) {
+	// 	cerr<<"FALSE!!!!!!!!!!"<<endl;
+	// 	exit(0);
+	// } 
+	// // else
+	// // cerr<<"TRUE!!!!!!!!!!"<<endl;
 	return hash;
 }
