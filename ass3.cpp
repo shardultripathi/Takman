@@ -55,6 +55,7 @@ int main() {
 		game->update_board(str,1);
 
 		str = ids(game).second;
+		// SearchData data = ids(game);
 			
 		cout<<str<<endl;
 		game->update_board(str,player_id);
@@ -80,6 +81,7 @@ int main() {
 		game->update_board(str,opp);
 
 		t = ids(game);
+		// SearchData data = ids(game);
 
 		str = t.second;
 		cout<<str<<endl;

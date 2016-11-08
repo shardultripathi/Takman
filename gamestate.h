@@ -32,5 +32,5 @@ class gamestate
 	bool road(int);
 	int over();
 	void print_board();
-	uint64_t getHash();
+	inline uint64_t getHash() { return hash; };
 };

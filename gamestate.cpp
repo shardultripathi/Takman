@@ -443,36 +443,36 @@ void gamestate::print_board() {
 	}
 }
 
-uint64_t gamestate::getHash()
-{
-	// hash2 = 0;
-	// int z = 0;
-	// for (int i=0; i<n; i++)
-	// {
-	// 	for (int j=0; j<n; j++)
-	// 	{
-	// 		for (int k=0; k<height[i][j]; k++)
-	// 		{
-	// 		 /////////// 0 my flat, 1 my wall, 2 my cap, 3 opp flat, 4 opp wall, 5 opp cap
-	// 			// switch(board[i][j][k]){
-	// 			// 	case 1: z = 0; break;
-	// 			// 	case 2: z = 1; break;
-	// 			// 	case 3: z = 2; break;
-	// 			// 	case -1: z = 3; break;
-	// 			// 	case -2: z = 4; break;
-	// 			// 	case -3: z = 5; break;
-	// 			// 	default: break;
-	// 			// }
-	// 			z = (board[i][j][k] > 0) ? board[i][j][k] - 1 : -board[i][j][k] + 2;
-	// 			hash2 ^= zobrist[i][j][k][z];
-	// 		}
-	// 	}
-	// }
-	// if(hash2!=hash) {
-	// 	cerr<<"FALSE!!!!!!!!!!"<<endl;
-	// 	exit(0);
-	// } 
-	// // else
-	// // cerr<<"TRUE!!!!!!!!!!"<<endl;
-	return hash;
-}
+// inline uint64_t gamestate::getHash()
+// {
+// 	// hash2 = 0;
+// 	// int z = 0;
+// 	// for (int i=0; i<n; i++)
+// 	// {
+// 	// 	for (int j=0; j<n; j++)
+// 	// 	{
+// 	// 		for (int k=0; k<height[i][j]; k++)
+// 	// 		{
+// 	// 		 /////////// 0 my flat, 1 my wall, 2 my cap, 3 opp flat, 4 opp wall, 5 opp cap
+// 	// 			// switch(board[i][j][k]){
+// 	// 			// 	case 1: z = 0; break;
+// 	// 			// 	case 2: z = 1; break;
+// 	// 			// 	case 3: z = 2; break;
+// 	// 			// 	case -1: z = 3; break;
+// 	// 			// 	case -2: z = 4; break;
+// 	// 			// 	case -3: z = 5; break;
+// 	// 			// 	default: break;
+// 	// 			// }
+// 	// 			z = (board[i][j][k] > 0) ? board[i][j][k] - 1 : -board[i][j][k] + 2;
+// 	// 			hash2 ^= zobrist[i][j][k][z];
+// 	// 		}
+// 	// 	}
+// 	// }
+// 	// if(hash2!=hash) {
+// 	// 	cerr<<"FALSE!!!!!!!!!!"<<endl;
+// 	// 	exit(0);
+// 	// } 
+// 	// // else
+// 	// // cerr<<"TRUE!!!!!!!!!!"<<endl;
+// 	return hash;
+// }

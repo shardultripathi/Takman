@@ -10,12 +10,12 @@
 #define hsize 111111113
 
 #define fc 100
-#define cs 70
+#define cs 80
 #define w 30
-#define c 10
-#define ccap 12
+#define c 12
+#define ccap 20
 #define s 15
-#define inf 10
+#define inf 12
 
 using namespace std;
 
@@ -227,13 +227,13 @@ int eval(gamestate* game)
  		{
  			col += influence_table[i][j];;
  		}
- 		if (col>=n)
+ 		if (col>=4*n/3)
  			col_influence += 2*inf*col;
- 		if (col<=-1*n)
+ 		if (col<=-4*n/3)
  			col_influence -= 2*inf*col;
  	}
  
- 	return (8*flatcount + centre_control + 2*stack_color + 5*total_influence + 3*row_influence + 3*col_influence);
+ 	return (8*flatcount + 2*centre_control + 3*stack_color + 4*total_influence + 4*row_influence + 4*col_influence);
 }
 
 inline int max_val(int a, int b)
@@ -348,23 +348,42 @@ int mtdf (gamestate* game, int f, int d)
 	return g;
 }
 
+// struct SearchData
+// {
+// 	int eval;
+// 	string bm;
+// 	unordered_map<uint64_t,evalInfo>* tt;
+// 	unordered_map<string,int>* ht;
+
+// 	SearchData(int e, string s, unordered_map<uint64_t,evalInfo>* ev, unordered_map<string,int>* hh)
+// 	{
+// 		eval = e;
+// 		bm = s;
+// 		tt = ev;
+// 		ht = hh;
+// 	}
+// };
+
 pair<int,string> ids(gamestate* game)
 {
 	ttable.clear();
 	// history.clear();
 	for (auto entry : history)
-		entry.second /= 10;
+		entry.second /= 8;
 	// nodes = 0;
 	static int count = 0;
-	static int dlimit = 6;
+	// static int dlimit = 7;
 	// if (count<7) dlimit = 6; else dlimit = 7;
 	int guess = 0;
 	int tm;
 	string move;
+	double br = 0.0;
 
-	for (int d=1; d<=dlimit; d++)
+	for (int d=1; ; d++)
 	{
 		nodes = 0;
+		if (tm*br/1000 > 8)
+			break;
 		auto start = std::chrono::system_clock::now();
 		cerr<<"depth: "<<d;
 		// guess = mtdf(game,guess,d);
@@ -372,14 +391,16 @@ pair<int,string> ids(gamestate* game)
 		guess = negamax(game,neg,pos,d,true);
 		auto end = std::chrono::system_clock::now();
 		tm = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-		move = (&(ttable.find(game->getHash())->second))->bmove;
+		move = (&(ttable.find(game->hash)->second))->bmove;
+		br = pow(nodes,1.0/(d+1));
 		cerr<<" abttmove: "<<move;
 		cerr<<" val: "<<guess/10;
 		cerr<<" time: "<<tm/1000;
-		cerr<<" branching: "<<pow(nodes,1.0/(d+1));
+		cerr<<" branching: "<<br;
 		cerr<<" nodes: "<<nodes<<endl;
 	}
 	count++;
+	// return SearchData(guess,move,&ttable,&history);
 	return make_pair(guess,move);
 }
 
@@ -387,7 +408,7 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 {
 	nodes++;
 	int alphaOrig = alpha;
-	auto entry = ttable.find(game->getHash());
+	auto entry = ttable.find(game->hash);
 	evalInfo* info;
 	string bestmove = "";
 
@@ -431,23 +452,20 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 			v = history[moves[i]];
 			sorted_moves.push_back(make_pair(moves[i],v));
 		}
-	sort(sorted_moves.begin(),sorted_moves.end(),myComparison);
+		sort(sorted_moves.begin(),sorted_moves.end(),myComparison);
 
-	if (bestmove != "") /////best move first
-	{
-		game->update_board(bestmove,player);
-		localW2F = game->wallToFlat;
+	if (bestmove == "")
+		bestmove = sorted_moves[0].first;
 
-		v = -negamax(game,-beta,-alpha,depth-1,!maxNode);
-		
-		game->wallToFlat = localW2F;
-		game->undo_move(bestmove,player);
-
-		bestValue = std::max(bestValue,v);
-		alpha = std::max(alpha,v);
-		if (alpha >= beta)
-			goto hell;
-	}
+	game->update_board(bestmove,player);
+	localW2F = game->wallToFlat;
+	v = -negamax(game,-beta,-alpha,depth-1,!maxNode);
+	game->wallToFlat = localW2F;
+	game->undo_move(bestmove,player);
+	bestValue = std::max(bestValue,v);
+	alpha = std::max(alpha,v);
+	if (alpha >= beta)
+		goto hell;
 
 	for (int i=0; i<moves_size; i++)
 	{
@@ -456,6 +474,11 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 		game->update_board(sorted_moves[i].first,player);
 		localW2F = game->wallToFlat;
 
+		// v = -negamax(game,-alpha-1,-alpha,depth-1,!maxNode);
+
+		// if (v > alpha && v < beta && depth > 1) 
+  // 			v = std::max(v,-negamax(game,-beta,-v,depth-1,!maxNode));
+		
 		v = -negamax(game,-beta,-alpha,depth-1,!maxNode);
 		
 		game->wallToFlat = localW2F;
@@ -468,11 +491,8 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 		}
 		
 		if (bestValue >= beta)
-		{
-			// bestmove = sorted_moves[i].first;
-			// cerr<<i<<endl;
 			break;
-		}
+		
 		alpha = std::max(alpha,bestValue);
 	}
 
@@ -480,18 +500,18 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 	history[bestmove] += pow(2,depth);
 	// history[bestmove] += depth*depth;
 	if (bestValue <= alphaOrig)
-		storeEntry(game->getHash(),bestValue,upperbound,depth,bestmove);
+		storeEntry(game->hash,bestValue,upperbound,depth,bestmove);
 	else if (bestValue >= beta)
-		storeEntry(game->getHash(),bestValue,lowerbound,depth,bestmove);
+		storeEntry(game->hash,bestValue,lowerbound,depth,bestmove);
 	else
-		storeEntry(game->getHash(),bestValue,exact,depth,bestmove);
+		storeEntry(game->hash,bestValue,exact,depth,bestmove);
 	return bestValue;
 }
 
 // int abtt (gamestate* game, int alpha, int beta, int depth, bool maxNode)
 // {
 // 	int value;
-// 	auto entry = ttable.find(game->getHash());
+// 	auto entry = ttable.find(game->hash);
 	
 // 	string bmove = "";
 
@@ -642,139 +662,136 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 // 	// void storeEntry(uint64_t hash, int upper, int lower, int depth, int bm, string bmove)
 // 	hell:
 // 	if (value <= alpha)
-// 		storeUpper(game->getHash(),value,neg,depth,bmove);
+// 		storeUpper(game->hash,value,neg,depth,bmove);
 // 	else if (value > alpha && value < beta)
-// 		storeEntry(game->getHash(),value,value,depth,bmove);
+// 		storeEntry(game->hash,value,value,depth,bmove);
 // 	else
-// 		storeLower(game->getHash(),pos,value,depth,bmove);
+// 		storeLower(game->hash,pos,value,depth,bmove);
 // 	return value;
 // }
 
+// pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int beta, bool maxNode)
+// {
+// 	int game_over = game->over(); ///////// check who made the move previously
 
+// 	if (game_over==1) ////// I won by road
+// 		return make_pair(pos,"");
 
-pair<int,string> value(gamestate* game, int cutoff, int depth, int alpha, int beta, bool maxNode)
-{
-	int game_over = game->over(); ///////// check who made the move previously
+// 	if (game_over==-1) ////// Opp won by road
+// 		return make_pair(neg,"");
 
-	if (game_over==1) ////// I won by road
-		return make_pair(pos,"");
+// 	if (game_over==2) ////// Someone ran out of tiles
+// 		return make_pair(flatwin(game),"");
 
-	if (game_over==-1) ////// Opp won by road
-		return make_pair(neg,"");
+// 	if (game_over==3) /////// Board full
+// 		return make_pair(flatwin(game),"");
 
-	if (game_over==2) ////// Someone ran out of tiles
-		return make_pair(flatwin(game),"");
+// 	if (cutoff==depth)
+// 		return make_pair(eval(game),""); //// if it is maxnode =>
+// 										//// came from a move of minnode => evaluate wrt to other player	
 
-	if (game_over==3) /////// Board full
-		return make_pair(flatwin(game),"");
+// 	bool localW2F;
 
-	if (cutoff==depth)
-		return make_pair(eval(game),""); //// if it is maxnode =>
-										//// came from a move of minnode => evaluate wrt to other player	
+// 	if(depth==0) 
+// 	{
+// 		d_moves.clear();
+// 		generate_moves(d_moves,game,game->player_id);
+// 		dmoves_size = d_moves.size();
 
-	bool localW2F;
+// 		for(int i=0;i<dmoves_size;i++) 
+// 		{
+// 			game->update_board(d_moves[i],game->player_id);
+// 			game_over = game->over();
+// 			if(game_over==1) 
+// 			{
+// 				game->undo_move(d_moves[i],game->player_id);
+// 				return make_pair(pos,d_moves[i]);
+// 			}
+// 			if((game_over==2 || game_over==3) && flatwin(game)>0) 
+// 			{
+// 				game->undo_move(d_moves[i],game->player_id);
+// 				return make_pair(pos,d_moves[i]);
+// 			}
+// 			game->undo_move(d_moves[i],game->player_id);
+// 		}
+// 	}
 
-	if(depth==0) 
-	{
-		d_moves.clear();
-		generate_moves(d_moves,game,game->player_id);
-		dmoves_size = d_moves.size();
-
-		for(int i=0;i<dmoves_size;i++) 
-		{
-			game->update_board(d_moves[i],game->player_id);
-			game_over = game->over();
-			if(game_over==1) 
-			{
-				game->undo_move(d_moves[i],game->player_id);
-				return make_pair(pos,d_moves[i]);
-			}
-			if((game_over==2 || game_over==3) && flatwin(game)>0) 
-			{
-				game->undo_move(d_moves[i],game->player_id);
-				return make_pair(pos,d_moves[i]);
-			}
-			game->undo_move(d_moves[i],game->player_id);
-		}
-	}
-
-	if (maxNode)
-	{
-		int max = neg;
+// 	if (maxNode)
+// 	{
+// 		int max = neg;
 		
-		vector<string> moves; generate_moves(moves,game,game->player_id);
+// 		vector<string> moves; generate_moves(moves,game,game->player_id);
 		
-		int moves_size = moves.size();
-		int max_index = 0;
-		int temp;
+// 		int moves_size = moves.size();
+// 		int max_index = 0;
+// 		int temp;
 
-		vector<pair<string,int> > sorted_moves;
-		for (int i=0; i<moves_size; i++)
-		{
-			game->update_board(moves[i],game->player_id);
-			localW2F = game->wallToFlat;
-			temp = eval(game);
-			game->wallToFlat = localW2F;
-			game->undo_move(moves[i],game->player_id);
-			sorted_moves.push_back(make_pair(moves[i],temp));
-		}
-		sort(sorted_moves.begin(),sorted_moves.end(),myComparison);
+// 		vector<pair<string,int> > sorted_moves;
+// 		for (int i=0; i<moves_size; i++)
+// 		{
+// 			game->update_board(moves[i],game->player_id);
+// 			localW2F = game->wallToFlat;
+// 			temp = eval(game);
+// 			game->wallToFlat = localW2F;
+// 			game->undo_move(moves[i],game->player_id);
+// 			sorted_moves.push_back(make_pair(moves[i],temp));
+// 		}
+// 		sort(sorted_moves.begin(),sorted_moves.end(),myComparison);
 
-		for (int i=0; i<moves_size; i++)
-		{
-			game->update_board(sorted_moves[i].first,game->player_id);
-			localW2F = game->wallToFlat;
-			temp = value(game,cutoff,depth+1,alpha,beta,false).first;
-			if (temp>max)
-			{
-				max = temp;
-				max_index = i;
-			}
-			game->wallToFlat = localW2F;
-			game->undo_move(sorted_moves[i].first,game->player_id);
-			if (max >= beta)
-				return make_pair(max,sorted_moves[i].first);
-			alpha = max_val(alpha,max);
-		}
-		return make_pair(max,sorted_moves[max_index].first);
-	}
-	else
-	{
-		int min = pos;
-		vector<string> moves; generate_moves(moves,game,game->other_player);
-		int moves_size = moves.size();
-		int min_index = 0;
-		int temp;
+// 		for (int i=0; i<moves_size; i++)
+// 		{
+// 			game->update_board(sorted_moves[i].first,game->player_id);
+// 			localW2F = game->wallToFlat;
+// 			temp = value(game,cutoff,depth+1,alpha,beta,false).first;
+// 			if (temp>max)
+// 			{
+// 				max = temp;
+// 				max_index = i;
+// 			}
+// 			game->wallToFlat = localW2F;
+// 			game->undo_move(sorted_moves[i].first,game->player_id);
+// 			if (max >= beta)
+// 				return make_pair(max,sorted_moves[i].first);
+// 			alpha = max_val(alpha,max);
+// 		}
+// 		return make_pair(max,sorted_moves[max_index].first);
+// 	}
+// 	else
+// 	{
+// 		int min = pos;
+// 		vector<string> moves; generate_moves(moves,game,game->other_player);
+// 		int moves_size = moves.size();
+// 		int min_index = 0;
+// 		int temp;
 
-		vector<pair<string,int> > sorted_moves;
-		for (int i=0; i<moves_size; i++)
-		{
-			game->update_board(moves[i],game->other_player);
-			localW2F = game->wallToFlat;
-			temp = eval(game);
-			game->wallToFlat = localW2F;
-			game->undo_move(moves[i],game->other_player);
-			sorted_moves.push_back(make_pair(moves[i],temp));
-		}
-		sort(sorted_moves.begin(),sorted_moves.end(),myComparison2);
+// 		vector<pair<string,int> > sorted_moves;
+// 		for (int i=0; i<moves_size; i++)
+// 		{
+// 			game->update_board(moves[i],game->other_player);
+// 			localW2F = game->wallToFlat;
+// 			temp = eval(game);
+// 			game->wallToFlat = localW2F;
+// 			game->undo_move(moves[i],game->other_player);
+// 			sorted_moves.push_back(make_pair(moves[i],temp));
+// 		}
+// 		sort(sorted_moves.begin(),sorted_moves.end(),myComparison2);
 
-		for (int i=0; i<moves_size; i++)
-		{
-			game->update_board(sorted_moves[i].first,game->other_player);
-			localW2F = game->wallToFlat;
-			temp = value(game,cutoff,depth+1,alpha,beta,true).first;
-			if (temp<min)
-			{
-				min = temp;
-				min_index = i;
-			}
-			game->wallToFlat = localW2F;
-			game->undo_move(sorted_moves[i].first,game->other_player);
-			if (min <= alpha) 
-				return make_pair(min,sorted_moves[i].first);
-			beta = min_val(beta,min);
-		}
-		return make_pair(min,sorted_moves[min_index].first);
-	}
-	
-}
+// 		for (int i=0; i<moves_size; i++)
+// 		{
+// 			game->update_board(sorted_moves[i].first,game->other_player);
+// 			localW2F = game->wallToFlat;
+// 			temp = value(game,cutoff,depth+1,alpha,beta,true).first;
+// 			if (temp<min)
+// 			{
+// 				min = temp;
+// 				min_index = i;
+// 			}
+// 			game->wallToFlat = localW2F;
+// 			game->undo_move(sorted_moves[i].first,game->other_player);
+// 			if (min <= alpha) 
+// 				return make_pair(min,sorted_moves[i].first);
+// 			beta = min_val(beta,min);
+// 		}
+// 		return make_pair(min,sorted_moves[min_index].first);
+// 	}	
+// }

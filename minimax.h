@@ -25,4 +25,4 @@ pair<int,string> ids(gamestate* );
 int negamax(gamestate* , int , int , int , bool);
 // int abtt (gamestate* , int , int , int , bool );
 // int test (gamestate* , int , int , int , bool );
-pair<int,string> value(gamestate* , int, int, int, int, bool);
+// pair<int,string> value(gamestate* , int, int, int, int, bool);
