@@ -233,7 +233,7 @@ int eval(gamestate* game)
  			col_influence -= 2*inf*col;
  	}
  
- 	return (8*flatcount + 2*centre_control + 3*stack_color + 4*total_influence + 4*row_influence + 4*col_influence);
+ 	return (7*flatcount + 2*centre_control + 3*stack_color + 5*total_influence + 4*row_influence + 4*col_influence);
 }
 
 inline int max_val(int a, int b)
@@ -367,19 +367,19 @@ int mtdf (gamestate* game, int f, int d)
 pair<int,string> ids(gamestate* game)
 {
 	ttable.clear();
-	// history.clear();
-	for (auto entry : history)
-		entry.second /= 8;
+	history.clear();
+	// for (auto entry : history)
+		// entry.second /= 8;
 	// nodes = 0;
 	static int count = 0;
-	// static int dlimit = 7;
+	static int dlimit = 7;
 	// if (count<7) dlimit = 6; else dlimit = 7;
 	int guess = 0;
 	int tm;
 	string move;
 	double br = 0.0;
 
-	for (int d=1; ; d++)
+	for (int d=1; d<=dlimit; d++)
 	{
 		nodes = 0;
 		if (tm*br/1000 > 8)
@@ -394,7 +394,7 @@ pair<int,string> ids(gamestate* game)
 		move = (&(ttable.find(game->hash)->second))->bmove;
 		br = pow(nodes,1.0/(d+1));
 		cerr<<" abttmove: "<<move;
-		cerr<<" val: "<<guess/10;
+		cerr<<" val: "<<guess/25;
 		cerr<<" time: "<<tm/1000;
 		cerr<<" branching: "<<br;
 		cerr<<" nodes: "<<nodes<<endl;
@@ -497,8 +497,8 @@ int negamax(gamestate* game, int alpha, int beta, int depth, bool maxNode)
 	}
 
 	hell:
-	history[bestmove] += pow(2,depth);
-	// history[bestmove] += depth*depth;
+	// history[bestmove] += pow(2,depth);
+	history[bestmove] += depth*depth;
 	if (bestValue <= alphaOrig)
 		storeEntry(game->hash,bestValue,upperbound,depth,bestmove);
 	else if (bestValue >= beta)
