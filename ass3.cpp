@@ -46,8 +46,21 @@ int main() {
 	
 	if(player_id==1) 
 	{
-
-		str = "Fa1";
+		srand(time(NULL));
+		int a = rand()%5;
+		int b = rand()%5;
+		switch(a)
+		{
+			case 0: str = "Fa" + to_string(b+1); break;
+			case 1: str = "Fb" + to_string(b+1); break;
+			case 2: str = "Fc" + to_string(b+1); break;
+			case 3: str = "Fd" + to_string(b+1); break;
+			case 4: str = "Fe" + to_string(b+1); break;
+			default: break;
+		}
+		
+		
+		// str = "Fa1";
 		cout<<str<<endl;
 		game->update_board(str,2);
 

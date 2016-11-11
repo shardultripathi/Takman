@@ -30,7 +30,7 @@ class gamestate
 	void getNeighbours(int, int, int, vector<pair<int,int> >&);
 	bool dfs(int, int, int, int);
 	bool road(int);
-	int over();
+	int over(bool);
 	void print_board();
 	inline uint64_t getHash() { return hash; };
 };

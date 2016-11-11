@@ -398,12 +398,23 @@ bool gamestate::road(int player)
 	return false;
 }
 
-int gamestate::over() ////////// make changes
+int gamestate::over(bool maxNode) ////////// make changes
 {
-	if (road(player_id))
-		return 1;
-	if (road(other_player))
-		return -1;
+	if (maxNode)
+	{
+		if (road(other_player))
+			return -1;
+		if (road(player_id))
+			return 1;
+	}
+	else
+	{
+		if (road(player_id))
+			return 1;
+		if (road(other_player))
+			return -1;	
+	}
+	
 	if ((myFlatstones==0 && myCapstones==0) || (otherFlatstones==0 && otherCapstones==0))
 		return 2;
 	for (int i=0; i<n; i++)
