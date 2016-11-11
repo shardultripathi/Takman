@@ -47,6 +47,7 @@ int main() {
 
 	int a = rand()%n;
 	int b = rand()%n;
+	
 
 	
 
@@ -54,10 +55,11 @@ int main() {
 	
 	if(player_id==1) 
 	{
-		
-		
-		str = "F" + (char)(a+'a') + to_string(b+1);
-		
+		c = a+'a';
+		str = "F";
+		str += c;
+		str += to_string(b+1);
+		cerr<<str<<endl;
 		
 		// str = "Fa1";
 		cout<<str<<endl;
@@ -85,7 +87,11 @@ int main() {
 			a = rand()%n;
 			b = rand()%n;
 		}
-		str = "F" + (char)(a+'a') + to_string(b+1);
+		c = a+'a';
+		str = "F";
+		str += c;
+		str += to_string(b+1);
+		cerr<<str<<endl;
 		cout<<str<<endl;
 		game->update_board(str,1);
 	}
