@@ -12,7 +12,7 @@ class Server:
 			None
 		"""
 		self.communicator_list = []
-		self.NETWORK_TIMER = 1500
+		self.NETWORK_TIMER = 150
 		self.log_file_handle = None
 
 	def setLogFile(self, filename):

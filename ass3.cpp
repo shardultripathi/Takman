@@ -1,6 +1,7 @@
 #include "gamestate.h"
 #include "getmoves.h"
 #include "minimax.h"
+#include <chrono>
 
 // #define neg	std::numeric_limits<int>::min()
 // #define pos	std::numeric_limits<int>::max()
@@ -42,22 +43,20 @@ int main() {
 
 	gamestate *game = new gamestate(n,tl,player_id);
 
+	srand(time(NULL));
+
+	int a = rand()%n;
+	int b = rand()%n;
+
+	
+
 	/////////////////////////////////////////
 	
 	if(player_id==1) 
 	{
-		srand(time(NULL));
-		int a = rand()%5;
-		int b = rand()%5;
-		switch(a)
-		{
-			case 0: str = "Fa" + to_string(b+1); break;
-			case 1: str = "Fb" + to_string(b+1); break;
-			case 2: str = "Fc" + to_string(b+1); break;
-			case 3: str = "Fd" + to_string(b+1); break;
-			case 4: str = "Fe" + to_string(b+1); break;
-			default: break;
-		}
+		
+		
+		str = "F" + (char)(a+'a') + to_string(b+1);
 		
 		
 		// str = "Fa1";
@@ -77,10 +76,16 @@ int main() {
 	{
 		getline(cin,str);
 		game->update_board(str,2);
-		if (game->height[0][0]==0)
-			str = "Fa1";
-		else
-			str = "Fa5";
+		// if (game->height[a][b]==0)
+		// 	str = "Fa1";
+		// else
+		// 	str = "Fa5";
+
+		while(game->height[a][b]!=0) {
+			a = rand()%n;
+			b = rand()%n;
+		}
+		str = "F" + (char)(a+'a') + to_string(b+1);
 		cout<<str<<endl;
 		game->update_board(str,1);
 	}

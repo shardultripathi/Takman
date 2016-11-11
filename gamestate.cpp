@@ -13,8 +13,23 @@ gamestate::gamestate(int N, int time, int player)
 	player_id = player;
 	other_player = (player==1)?2:1;
 
-	myFlatstones = otherFlatstones = 21; /////// do wrt n finally
-	myCapstones = otherCapstones = 1;
+	switch(n) {
+        case 6: myFlatstones = 30;
+                otherFlatstones = 30;
+                myCapstones = 1;
+                otherCapstones = 1;
+                break;
+        case 7: myFlatstones = 40;
+                otherFlatstones = 40;
+                myCapstones = 1;
+	            otherCapstones = 1;
+                break;
+        default:myFlatstones = 21;
+                otherFlatstones = 21;
+                myCapstones = 1;
+                otherCapstones = 1;
+       }
+
 
 	board = new int**[n];
 	height = new int*[n];
