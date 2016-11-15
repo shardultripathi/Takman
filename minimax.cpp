@@ -4,8 +4,8 @@
 
 // #define neg	std::numeric_limits<int>::min()
 // #define pos	std::numeric_limits<int>::max()
-#define neg -1000000
-#define pos 1000000
+#define neg -10000000
+#define pos 10000000
 #define ttsize 47901599
 #define hsize 167923
 
@@ -58,6 +58,7 @@ int col_num = 0;
 int composition = 0;
 int row_influence = 0; int col_influence = 0;
 int mid;
+int attack = 1; 
 
 int influence_table[7][7];	///////////////////////////////////
 
@@ -111,54 +112,48 @@ void update_start_time(int n, double tl)
 			cutoff_bonus = 20000; 
 			fc = 100;
 			cs = 85;
-			w = 40;
-			c = 12;
+			w = 30;
+			c = 15;
 			ccap = 15;
-			s = 15;
+			s = 18;
 			inf = 10;
 			wallpenalty = 10; 
+			attack = 1;
 			break;
 		}
 		case 6: 
 		{
-			bonus = 3000; 
-			cutoff_bonus = 30000; 
+			bonus = 2500; 
+			cutoff_bonus = 45000; 
 			fc = 100;
 			cs = 85;
 			w = 40;
 			c = 15;
 			ccap = 20;
-			s = 15;
+			s = 18;
 			inf = 10;
 			wallpenalty = 10; 
+			attack = 2;
 			break;
 		}
 		default: 
 		{
-			bonus = 3000; 
-			cutoff_bonus = 30000; 
+			// bonus = 3000;
+			bonus = 1000; 
+			cutoff_bonus = 75000; 
 			fc = 100;
 			cs = 85;
 			w = 40;
 			c = 15;
 			ccap = 20;
-			s = 15;
+			s = 18;
 			inf = 10;
 			wallpenalty = 10; 
+			attack = 2;
 			break;
 		}
 	}
 }
-
-struct evalInfo 
-{
-	entry_type type;
-	int value;
-	int depth;
-	string bmove;
-	evalInfo() : type(exact), value(0), depth(0), bmove("") { }
-	evalInfo(entry_type t, int v, int d, string bms) : type(t), value(v), depth(d), bmove(bms) { }
-};
 
 struct EvalInfo 
 {
@@ -171,17 +166,11 @@ struct EvalInfo
 	EvalInfo(int l, int u, int d, string bms) : lbound(l), ubound(u), depth(d), bmove(bms) { }
 };
 
-// unordered_map<uint64_t,evalInfo> ttable(ttsize);
+
 unordered_map<uint64_t,EvalInfo> ttable(ttsize);
 unordered_map<string,int> history(hsize);
 unordered_map<string,int> historyopp(hsize);
 
-// unordered_map<string,int> myflatcap(257);
-// unordered_map<string,int> mystack(7919);
-// unordered_map<string,int> mystanding(257);
-// unordered_map<string,int> oppflatcap(257);
-// unordered_map<string,int> oppstack(7919);
-// unordered_map<string,int> oppstanding(257);
 
 int flatwin(gamestate* game) //// change in case of draw
 {
@@ -256,12 +245,12 @@ int eval(gamestate* game) ///// check and tune
  						oppcolor++;
  				}
  				stack = mycolor*s - oppcolor*s;
- 				if (peice==1) stack += (stack>0)?2*s:-3*s;
- 				else if (peice==-1) stack -= (stack>0)?-3*s:2*s;
+ 				if (peice==1) stack += (stack>0)?2*s:-5*s;
+ 				else if (peice==-1) stack -= (stack>0)?-5*s:2*s;
  				else if (peice==3) stack += (stack>0)?s*5:-5*s;
  				else if (peice==-3) stack -= (stack>0)?-5*s:s*5;
- 				else if (peice==2) stack += (stack>0)?3*s:-2*s;
- 				else stack -= (stack>0)?-2*s:3*s;
+ 				else if (peice==2) stack += (stack>0)?3*s:-5*s;
+ 				else stack -= (stack>0)?-5*s:3*s;
  				stack_color += stack;
  
  				if (mycolor>0 && peice > 0)
@@ -376,8 +365,8 @@ int eval(gamestate* game) ///// check and tune
  			if (peice == 1 || peice == 3)
  				row_num++;
  			else if (peice == -1 || peice == -3)
- 				row_num-=2;
- 			composition += pow(row_num,3);
+ 				row_num-=attack;
+ 			composition += row_num*row_num*row_num;
  			total_influence += influence_table[i][j]*inf;
  			row += influence_table[i][j];
  		}
@@ -396,8 +385,8 @@ int eval(gamestate* game) ///// check and tune
  			if (peice == 1 || peice == 3)
  				col_num++;
  			else if (peice == -1 || peice == -3)
- 				col_num-=2;
- 			composition += pow(col_num,3);
+ 				col_num-=attack;
+ 			composition += col_num*col_num*col_num;
 
  			col += influence_table[i][j];;
  		}
@@ -407,8 +396,9 @@ int eval(gamestate* game) ///// check and tune
  			col_influence -= 2*inf*col;
  	}
  
- 	// return (8*flatcount + 2*centre_control + 3*stack_color + 3*total_influence + 4*row_influence + 4*col_influence + wall_dis + 0.75*composition);
- 	return (15*flatcount + 6*centre_control + 3*stack_color + 5.5*total_influence + 3*row_influence + 3*col_influence + wall_dis + 1*composition);
+ 	// return (8*flatcount + 3*centre_control + 3*stack_color + 3*total_influence + 4*row_influence + 4*col_influence + wall_dis + 0.75*composition); /*5*/
+ 	return (15.5*flatcount + 6*centre_control + 3*stack_color + 6*total_influence + 4*row_influence + 4*col_influence + wall_dis + 1.25*composition); /*5,6*/
+ 	// return (22*flatcount + 8*centre_control + 4*stack_color + 8*total_influence + 5*row_influence + 5*col_influence + 1.5*wall_dis + 1.25*composition);7
 }
 
 bool myComparison(const pair<string,int> &a,const pair<string,int> &b)
@@ -428,51 +418,6 @@ bool moveCompopp(const string& a, const string& b)
 	return historyopp[a]>historyopp[b];
 }
 
-// bool myplacecomp(const string& a, const string& b) ///// place
-// {
-// 	return myflatcap[a]>myflatcap[b];
-// }
-// bool mystackcomp(const string& a, const string& b) ///// stack
-// {
-// 	return mystack[a]>mystack[b];
-// }
-// bool mystandingcomp(const string& a, const string& b) ////// standing
-// {
-// 	return mystanding[a]>mystanding[b];
-// }
-// bool oppplacecomp(const string& a, const string& b)
-// {
-// 	return oppflatcap[a]>oppflatcap[b];
-// }
-// bool oppstackcomp(const string& a, const string& b)
-// {
-// 	return oppstack[a]>oppstack[b];
-// }
-// bool oppstandingcomp(const string& a, const string& b)
-// {
-// 	return oppstanding[a]>oppstanding[b];
-// }
-
-// int mtdf (gamestate* game, int f, int d)
-// {
-// 	int g = f;
-// 	int beta;
-// 	int u = pos;
-// 	int l = neg;
-// 	while (l < u)
-// 	{
-// 		if (g == l) beta = g + 1;
-// 		else beta = g;
-// 		// g = abpruning(game,beta-1,beta,d,true);
-// 		g = negamax(game,beta-1,beta,d,true);
-// 		if (g < beta) 
-// 			u = g;
-// 		else
-// 			l = g;
-// 	}
-// 	return g;
-// }
-
 auto start_move = std::chrono::system_clock::now();
 auto end_move = std::chrono::system_clock::now();
 
@@ -488,12 +433,6 @@ pair<int,string> ids(gamestate* game)
 	static int n = game->n;
 
 	ttable.clear();
-	// myflatcap.clear();
-	// mystack.clear();
-	// mystanding.clear();
-	// oppflatcap.clear();
-	// oppstack.clear();
-	// oppstanding.clear();
 	history.clear();
 	historyopp.clear();
 	// count = 0;
@@ -514,9 +453,6 @@ pair<int,string> ids(gamestate* game)
 		fc = 150;
 
 	cerr<<"aim: "<<aim/1000<<endl;
-	// auto present = std::chrono::system_clock::now();
-	// remaining_time -= std::chrono::duration_cast<std::chrono::milliseconds>(present - start_time).count();
-	
 
 	start_move = std::chrono::system_clock::now();
 	for (int d=1; d<=dlimit; d++)
@@ -528,19 +464,15 @@ pair<int,string> ids(gamestate* game)
 			break;
 		auto start = std::chrono::system_clock::now();
 		cerr<<"depth: "<<d;
-		// guess = mtdf(game,guess,d);
+
 		guess = abtt(game,neg,pos,d,true);
-		// guess = abpruning(game,neg,pos,d,true);
-		// guess = negamax(game,neg,pos,d,true);
-		// guess = negatest(game,neg,pos,d,true);
+
 		auto end = std::chrono::system_clock::now();
 		tm = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 		move = (&(ttable.find(game->getHash())->second))->bmove;
 		br = pow(nodes,1.0/(d+1));
 		cerr<<" abttmove: "<<move;
 		cerr<<" val: "<<guess/25;
-		// cerr<<" ubound: "<<(&(ttable.find(game->getHash())->second))->ubound;
-		// cerr<<" lbound: "<<(&(ttable.find(game->getHash())->second))->lbound;
 		cerr<<" time: "<<tm/1000;
 		cerr<<" branching: "<<br;
 		cerr<<" nodes: "<<nodes<<endl;
@@ -783,146 +715,6 @@ void getpv(string& pv, gamestate* game, int depth, int turn)
 // 	return bestValue;
 // }
 
-void check(vector<string> &moves, string move) {
-	for(int i=0;i<moves.size();i++) {
-		if(moves[i]==move) {
-			cerr<<"present"<<endl;
-		}
-	}
-}
-
-// int fakeabtt(gamestate* game, int alpha, int beta, int depth, bool maxNode) {
-// 	int g;
-// 	auto entry = ttable.find(game->getHash());
-// 	EvalInfo* info;
-// 	string bestmove = "";
-
-// 	if (entry != ttable.end())
-// 	{
-// 		info = &(entry->second);
-// 		if (info->depth >= depth)
-// 		{
-// 			if (info->lbound >= beta)
-// 				return info->lbound;
-// 			else if (info->ubound <= alpha || info->ubound == info->lbound)
-// 				return info->ubound;
-// 			alpha = std::max(alpha,info->lbound);
-// 			beta = std::min(beta,info->ubound);
-// 		}
-// 		else
-// 		{
-// 			info->lbound = neg;
-// 			info->ubound = pos;
-// 		}
-// 		bestmove = info->bmove;
-// 	}
-	
-// 	int game_over = game->over(maxNode); //// 4 => not over
-
-// 	if (game_over == 1)
-// 		return pos;
-// 	else if (game_over == -1)
-// 		return neg;
-// 	else if (game_over == 2 || game_over == 3)
-// 		return flatwin(game);
-// 	else if (depth == 0)
-// 		return eval(game);
-// 	else
-// 	{
-// 		bool localW2F;
-// 		if (maxNode)
-// 		{
-// 			g = neg;
-// 			int a = alpha;
-
-// 			////// first flatstones
-// 			vector<string> moves; generate_moves(moves,game,game->player_id);
-// 			// check(moves,"4d3<22");
-// 			sort(moves.begin(),moves.end(),moveComp);
-// 			int moves_size = moves.size();
-// 			int temp;
-
-// 			if (bestmove == "")
-// 				bestmove = moves[0];
-// 			game->update_board(bestmove,game->player_id);
-// 			localW2F = game->wallToFlat;
-// 			// cerr<<bestmove<<endl;
-// 			temp = abtt(game,a,beta,depth-1,false);
-// 			game->wallToFlat = localW2F;
-// 			game->undo_move(bestmove,game->player_id);
-// 			g = std::max(g,temp);
-// 			a = std::max(a,g);
-// 			if (a >= beta)
-// 				return g;
-			
-// 			for (int i=0; i<moves_size; i++)
-// 			{
-// 				if (moves[i]==bestmove) continue;
-// 				game->update_board(moves[i],game->player_id);
-// 				localW2F = game->wallToFlat;
-// 				temp = abtt(game,a,beta,depth-1,false);
-// 				game->wallToFlat = localW2F;
-// 				game->undo_move(moves[i],game->player_id);
-// 				if (temp > g)
-// 				{
-// 					g = temp;
-// 					bestmove = moves[i];
-// 				}
-// 				a = std::max(a,g);
-// 				if (a >= beta)
-// 					break;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			g = pos;
-// 			int b = beta;
-// 			vector<string> moves; generate_moves(moves,game,game->other_player);
-// 			sort(moves.begin(),moves.end(),moveCompopp);
-// 			int moves_size = moves.size();
-// 			int temp;
-// 			if (bestmove == "")
-// 				bestmove = moves[0];
-
-// 			game->update_board(bestmove,game->other_player);
-// 			localW2F = game->wallToFlat;
-// 			// cerr<<bestmove<<endl;
-// 			temp = abtt(game,alpha,b,depth-1,true);
-// 			game->wallToFlat = localW2F;
-// 			game->undo_move(bestmove,game->other_player);
-// 			g = std::min(g,temp);	
-// 			b = std::min(b,g);
-// 			if (b <= alpha)
-// 				return g;
-			
-			
-// 			for (int i=0; i<moves_size; i++)
-// 			{
-// 				if (moves[i]==bestmove) continue;
-// 				game->update_board(moves[i],game->other_player);
-// 				localW2F = game->wallToFlat;
-
-// 				temp = abtt(game,alpha,b,depth-1,true);
-				
-// 				game->wallToFlat = localW2F;
-// 				game->undo_move(moves[i],game->other_player);
-
-// 				if (temp < g)
-// 				{
-// 					g = temp;
-// 					bestmove = moves[i];
-// 				}
-// 				b = std::min(b,g);
-// 				if (b <= alpha)
-// 					break;
-				
-// 			}
-// 		}
-// 	}
-
-// 		return g;
-
-// }
 
 int abtt (gamestate* game, int alpha, int beta, int depth, bool maxNode)
 {
@@ -1053,7 +845,6 @@ int abtt (gamestate* game, int alpha, int beta, int depth, bool maxNode)
 			if (g <= alpha)
 				goto hell;
 			
-			
 			for (int i=0; i<moves_size; i++)
 			{
 				if (sorted_moves[i].first==bestmove) continue;
@@ -1085,289 +876,15 @@ int abtt (gamestate* game, int alpha, int beta, int depth, bool maxNode)
 		e->depth = depth;
 		e->bmove = bestmove;
 
-		if (g <= alpha)
-			e->ubound = g;
-		else if (g > alpha && g < beta)
-		{
-			e->lbound = g;
-			e->ubound = g;
-		}
-		else
-			e->lbound = g;
-		
-		// cerr<<"type: "<<flag<<" g: "<<g/25<<" depth: "<<depth<<" bm: "<<bestmove<<endl;
+		// if (g <= alpha)
+		// 	e->ubound = g;
+		// else if (g > alpha && g < beta)
+		// {
+		// 	e->lbound = g;
+		// 	e->ubound = g;
+		// }
+		// else
+		// 	e->lbound = g;
 	}
 	return g;
 }
-
-// int abpruning (gamestate* game, int alpha, int beta, int depth, bool maxNode)getH// {
-// 	nodes++;
-// 	int value;
-// 	auto entry = ttable.find(game->hash());
-// 	evalInfo* info;
-// 	string bestmove = "";
-
-// 	if (entry != ttable.end())
-// 	{
-// 		info = &(entry->second);
-// 		if (info->depth >= depth)
-// 		{
-// 			if (info->type == exact)
-// 				return info->value;
-// 			else if (info->type == lowerbound)
-// 				alpha = std::max(alpha,info->value);
-// 			else if (info->type == upperbound)
-// 				beta = std::min(beta,info->value);
-// 			if (alpha >= beta)
-// 				return info->value;
-// 		}
-// 		bestmove = info->bmove;
-// 	}
-
-// 	int game_over = game->over(maxNode); //// 4 => not over
-
-// 	if (game_over == 1)
-// 		return pos;
-// 	else if (game_over == -1)
-// 		return neg;
-// 	else if (game_over == 2 || game_over == 3)
-// 		return flatwin(game);
-// 	else if (depth == 0)
-// 		return eval(game);
-// 	else
-// 	{
-// 		bool localW2F;
-// 		if (maxNode)
-// 		{
-// 			value = neg;
-// 			int a = alpha;
-// 			vector<string> moves;
-// 			int moves_size, temp;
-
-// 			////// first flatstones
-// 			place_new(moves,game,game->player_id,true);
-// 			sort(moves.begin(),moves.end(),myplacecomp);
-// 			moves_size = moves.size();
-
-// 			if (bestmove == "")
-// 				bestmove = moves[0];
-// 			game->update_board(bestmove,game->player_id);
-// 			localW2F = game->wallToFlat;
-// 			temp = abpruning(game,a,beta,depth-1,false);
-// 			game->wallToFlat = localW2F;
-// 			game->undo_move(bestmove,game->player_id);
-// 			value = std::max(value,temp);
-// 			if (value >= beta)
-// 				goto hell;
-// 			a = std::max(a,value);
-
-// 			for (int i=0; i<moves_size; i++)
-// 			{
-// 				if (moves[i]==bestmove) continue;
-// 				game->update_board(moves[i],game->player_id);
-// 				localW2F = game->wallToFlat;
-
-// 				temp = abpruning(game,a,beta,depth-1,false);
-				
-// 				game->wallToFlat = localW2F;
-// 				game->undo_move(moves[i],game->player_id);
-
-// 				if (temp > value)
-// 				{
-// 					value = temp;
-// 					bestmove = moves[i];
-// 				}
-// 				if (value >= beta)
-// 					break;
-// 				a = std::max(a,value);
-// 			}
-
-// 			////// stack moves
-// 			generate_moves(moves,game,game->player_id);
-// 			sort(moves.begin(),moves.end(),mystackcomp);
-// 			moves_size = moves.size();
-
-// 			for (int i=0; i<moves_size; i++)
-// 			{
-// 				game->update_board(moves[i],game->player_id);
-// 				localW2F = game->wallToFlat;
-
-// 				temp = abpruning(game,a,beta,depth-1,false);
-				
-// 				game->wallToFlat = localW2F;
-// 				game->undo_move(moves[i],game->player_id);
-
-// 				if (temp > value)
-// 				{
-// 					value = temp;
-// 					bestmove = moves[i];
-// 				}
-// 				if (value >= beta)
-// 					break;
-// 				a = std::max(a,value);
-// 			}
-
-
-// 			///// standing stones
-// 			place_new(moves,game,game->player_id,false);
-// 			sort(moves.begin(),moves.end(),mystandingcomp);
-// 			moves_size = moves.size();
-
-// 			for (int i=0; i<moves_size; i++)
-// 			{
-// 				game->update_board(moves[i],game->player_id);
-// 				localW2F = game->wallToFlat;
-
-// 				temp = abpruning(game,a,beta,depth-1,false);
-				
-// 				game->wallToFlat = localW2F;
-// 				game->undo_move(moves[i],game->player_id);
-
-// 				if (temp > value)
-// 				{
-// 					value = temp;
-// 					bestmove = moves[i];
-// 				}
-// 				if (value >= beta)
-// 					break;
-// 				a = std::max(a,value);
-// 			}
-// 		}
-// 		else
-// 		{
-// 			value = pos;
-// 			int b = beta;
-// 			vector<string> moves; 
-// 			int moves_size, temp;
-
-// 			///// first flat
-// 			place_new(moves,game,game->other_player,true);
-// 			sort(moves.begin(),moves.end(),oppplacecomp);
-// 			moves_size = moves.size();
-// 			if (bestmove == "")
-// 				bestmove = moves[0];
-
-// 			game->update_board(bestmove,game->other_player);
-// 			localW2F = game->wallToFlat;
-// 			temp = abpruning(game,alpha,b,depth-1,true);
-// 			game->wallToFlat = localW2F;
-// 			game->undo_move(bestmove,game->other_player);
-// 			value = std::min(value,temp);	
-// 			if (value <= alpha)
-// 				goto hell;
-// 			b = std::min(b,value);
-			
-// 			for (int i=0; i<moves_size; i++)
-// 			{
-// 				if (moves[i]==bestmove) continue;
-// 				game->update_board(moves[i],game->other_player);
-// 				localW2F = game->wallToFlat;
-
-// 				temp = abpruning(game,alpha,b,depth-1,true);
-				
-// 				game->wallToFlat = localW2F;
-// 				game->undo_move(moves[i],game->other_player);
-
-// 				if (temp < value)
-// 				{
-// 					value = temp;
-// 					bestmove = moves[i];
-// 				}
-				
-// 				if (value <= alpha)
-// 					break;
-// 				b = std::min(b,value);
-// 			}
-
-
-// 			////// stack moves
-// 			generate_moves(moves,game,game->other_player);
-// 			sort(moves.begin(),moves.end(),oppstackcomp);
-// 			moves_size = moves.size();
-			
-// 			for (int i=0; i<moves_size; i++)
-// 			{
-// 				game->update_board(moves[i],game->other_player);
-// 				localW2F = game->wallToFlat;
-
-// 				temp = abpruning(game,alpha,b,depth-1,true);
-				
-// 				game->wallToFlat = localW2F;
-// 				game->undo_move(moves[i],game->other_player);
-
-// 				if (temp < value)
-// 				{
-// 					value = temp;
-// 					bestmove = moves[i];
-// 				}
-				
-// 				if (value <= alpha)
-// 					break;
-// 				b = std::min(b,value);
-// 			}
-
-
-// 			////// standing
-// 			place_new(moves,game,game->other_player,false);
-// 			sort(moves.begin(),moves.end(),oppstandingcomp);
-// 			moves_size = moves.size();
-			
-// 			for (int i=0; i<moves_size; i++)
-// 			{
-// 				game->update_board(moves[i],game->other_player);
-// 				localW2F = game->wallToFlat;
-
-// 				temp = abpruning(game,alpha,b,depth-1,true);
-				
-// 				game->wallToFlat = localW2F;
-// 				game->undo_move(moves[i],game->other_player);
-
-// 				if (temp < value)
-// 				{
-// 					value = temp;
-// 					bestmove = moves[i];
-// 				}
-				
-// 				if (value <= alpha)
-// 					break;
-// 				b = std::min(b,value);
-// 			}
-
-// 		}
-
-// 		hell:
-// 		if (maxNode)
-// 		{
-// 			if (bestmove[0] == 'F' || bestmove[0] == 'C')
-// 				myflatcap[bestmove] += depth*depth;
-// 			else if(bestmove[0] == 'S')
-// 				mystanding[bestmove] += depth*depth;
-// 			else
-// 				mystack[bestmove] += depth*depth;
-// 		}
-// 		else
-// 		{
-// 			if (bestmove[0] == 'F' || bestmove[0] == 'C')
-// 				oppflatcap[bestmove] += depth*depth;
-// 			else if(bestmove[0] == 'S')
-// 				oppstanding[bestmove] += depth*depth;
-// 			else
-// 				oppstack[bestmove] += depth*depth;
-// 		}
-		
-// 		entry_type flag = exact;
-// 		if (value <= alpha)
-// 			flag = upperbound;
-// 		else if (value >= beta)
-// 			flag = lowerbound;
-// 		else
-// 			flag = exact;
-// 		auto e = &(ttable[game->hash()]);
-// 		e->type = flag;
-// 		e->value = value;
-// 		e->depth = depth;
-// 		e->bmove = bestmove;
-// 		// cerr<<"type: "<<flag<<" value: "<<value/25<<" depth: "<<depth<<" bm: "<<bestmove<<endl;
-// 	}
-// 	return value;
-// }
