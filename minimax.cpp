@@ -152,7 +152,9 @@ int flatwin(gamestate* game) //// change in case of draw
 	// 	return (myflats-otherflats-delta)*pos/(myflats+otherflats); ///////// also return difference of leftover flatstones (used in case of draw)
 	// else
 	// 	return (myflats-otherflats+delta)*pos/(myflats+otherflats);
-		return (myflats-otherflats)*pos/(myflats+otherflats) + game->myFlatstones - game->otherFlatstones;
+		// if(remaining_time<7000)
+		// 	cerr<<myflats<<" "<<otherflats<<" "<<game->myFlatstones<<" "<<game->otherFlatstones<<endl;
+		return ((myflats-otherflats)*pos/(myflats+otherflats) + game->myFlatstones - game->otherFlatstones );
 }
 
 int eval(gamestate* game) ///// check and tune
@@ -425,7 +427,10 @@ bool moveCompopp(const string& a, const string& b)
 auto start_move = std::chrono::system_clock::now();
 auto end_move = std::chrono::system_clock::now();
 
-vector<string> moves56237;
+// int count;
+int dlimit = 6;
+int rem_moves;
+double aim;
 
 pair<int,string> ids(gamestate* game)
 {
@@ -438,34 +443,35 @@ pair<int,string> ids(gamestate* game)
 	// oppstanding.clear();
 	history.clear();
 	historyopp.clear();
-	static int count = 0;
+	// count = 0;
 	
 	int guess = 0;
 	double tm = 0.0;
 	string move;
 	double br = 0.0;
 
-	static int dlimit = 6;
+	
 	// if (count<3) dlimit = 3; else dlimit = 6;
-	static int rem_moves = 1.5*std::min(game->myFlatstones,game->otherFlatstones) + 3;
-	static double aim = 1000 + remaining_time/rem_moves;
+	rem_moves = 1.5*std::min(game->myFlatstones,game->otherFlatstones) + 3;
+	aim = 1000 + remaining_time/rem_moves;
 	if (std::min(game->myFlatstones,game->otherFlatstones) < 5)
 	{
 		fc = 150;
-		if (remaining_time < 20000)
+		if (remaining_time < 15000)
 			aim -= 1000;
 	}
+	cerr<<"aim: "<<aim/1000<<endl;
 	// auto present = std::chrono::system_clock::now();
 	// remaining_time -= std::chrono::duration_cast<std::chrono::milliseconds>(present - start_time).count();
 	
 
-	start_move = std::chrono::system_clock::now();;
+	start_move = std::chrono::system_clock::now();
 	for (int d=1; d<=dlimit; d++)
 	{
 		if (guess == pos)
 			break;
 		nodes = 0;
-		if (tm*(br) > aim)
+		if (tm*(br) > aim && d>1)
 			break;
 		auto start = std::chrono::system_clock::now();
 		cerr<<"depth: "<<d;
@@ -493,7 +499,7 @@ pair<int,string> ids(gamestate* game)
 	// cerr<<"time taken: "<< std::chrono::duration_cast<std::chrono::milliseconds>(end_move - start_move).count()/1000<<endl;
 	remaining_time -= std::chrono::duration_cast<std::chrono::milliseconds>(end_move - start_move).count();
 	// cerr<<"REMAINING: "<<remaining_time/1000<<endl;
-	count++;
+	// count++;
 	return make_pair(guess,move);
 }
 

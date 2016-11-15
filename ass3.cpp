@@ -58,10 +58,10 @@ int main() {
 		str = "F";
 		str += c;
 		str += to_string(b+1);
-		str = "Fa5";
+		// str = "Fa5";
 		// cerr<<str<<endl;
 		
-		// str = "Fc4";
+		// str = "Fd4";
 		cout<<str<<endl;
 		game->update_board(str,2);
 		game->print_board();

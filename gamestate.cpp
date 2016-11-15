@@ -430,7 +430,7 @@ int gamestate::over(bool maxNode) ////////// make changes
 			return -1;	
 	}
 	
-	if ((myFlatstones==0 && myCapstones==0) || (otherFlatstones==0 && otherCapstones==0))
+	if ((myFlatstones==0) || (otherFlatstones==0))
 		return 2;
 	for (int i=0; i<n; i++)
 		for (int j=0; j<n; j++)
