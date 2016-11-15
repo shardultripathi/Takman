@@ -48,7 +48,7 @@ int main() {
 	int a = rand()%n;
 	int b = rand()%n;
 	
-	update_start_time(tl*1.0);
+	update_start_time(n,tl*1.0);
 
 	/////////////////////////////////////////
 	

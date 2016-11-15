@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void update_start_time(double);
+void update_start_time(int,double);
 enum entry_type {exact,upperbound,lowerbound};
 int flatwin(gamestate* );
 int eval(gamestate*);

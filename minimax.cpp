@@ -22,10 +22,11 @@
 
 int fc = 100;
 int cs = 85;
-int w = 30;
-// int w = 40;
-int c = 12;
-int ccap = 15;
+int w = 40;
+// int c = 12; n5
+int c = 15;
+// int ccap = 15; n5
+int ccap = 20;
 int s = 15;
 int inf = 10;
 int wallpenalty = 10;
@@ -56,6 +57,7 @@ int row_num = 0;
 int col_num = 0;
 int composition = 0;
 int row_influence = 0; int col_influence = 0;
+int mid;
 
 int influence_table[7][7];	///////////////////////////////////
 
@@ -94,11 +96,58 @@ int infl[7][7] =
 std::chrono::system_clock::time_point start_time;
 
 double remaining_time;
+double bonus;
+double cutoff_bonus;
 
-void update_start_time(double tl)
+void update_start_time(int n, double tl)
 {
 	start_time = std::chrono::system_clock::now();
 	remaining_time = tl*1000;
+	switch(n)
+	{
+		case 5: 
+		{
+			bonus = 1000; 
+			cutoff_bonus = 20000; 
+			fc = 100;
+			cs = 85;
+			w = 40;
+			c = 12;
+			ccap = 15;
+			s = 15;
+			inf = 10;
+			wallpenalty = 10; 
+			break;
+		}
+		case 6: 
+		{
+			bonus = 3000; 
+			cutoff_bonus = 30000; 
+			fc = 100;
+			cs = 85;
+			w = 40;
+			c = 15;
+			ccap = 20;
+			s = 15;
+			inf = 10;
+			wallpenalty = 10; 
+			break;
+		}
+		default: 
+		{
+			bonus = 3000; 
+			cutoff_bonus = 30000; 
+			fc = 100;
+			cs = 85;
+			w = 40;
+			c = 15;
+			ccap = 20;
+			s = 15;
+			inf = 10;
+			wallpenalty = 10; 
+			break;
+		}
+	}
 }
 
 struct evalInfo 
@@ -167,9 +216,9 @@ int eval(gamestate* game) ///// check and tune
 	wall_dis = 0;
   	mycolor=0;
   	oppcolor=0;
-  	int row_num = 0;
-	int col_num = 0;
-	int composition = 0;
+  	row_num = 0;
+	col_num = 0;
+	composition = 0;
   
   	int n = game->n;
   	for (int i=0; i<n; i++)
@@ -207,10 +256,10 @@ int eval(gamestate* game) ///// check and tune
  						oppcolor++;
  				}
  				stack = mycolor*s - oppcolor*s;
- 				if (peice==1) stack += (stack>0)?2*s:-2*s;
- 				else if (peice==-1) stack -= (stack>0)?-2*s:2*s;
- 				else if (peice==3) stack += (stack>0)?s*5:-3*s;
- 				else if (peice==-3) stack -= (stack>0)?-3*s:s*5;
+ 				if (peice==1) stack += (stack>0)?2*s:-3*s;
+ 				else if (peice==-1) stack -= (stack>0)?-3*s:2*s;
+ 				else if (peice==3) stack += (stack>0)?s*5:-5*s;
+ 				else if (peice==-3) stack -= (stack>0)?-5*s:s*5;
  				else if (peice==2) stack += (stack>0)?3*s:-2*s;
  				else stack -= (stack>0)?-2*s:3*s;
  				stack_color += stack;
@@ -327,8 +376,8 @@ int eval(gamestate* game) ///// check and tune
  			if (peice == 1 || peice == 3)
  				row_num++;
  			else if (peice == -1 || peice == -3)
- 				row_num--;
- 			composition += row_num*row_num*row_num;
+ 				row_num-=2;
+ 			composition += pow(row_num,3);
  			total_influence += influence_table[i][j]*inf;
  			row += influence_table[i][j];
  		}
@@ -347,8 +396,8 @@ int eval(gamestate* game) ///// check and tune
  			if (peice == 1 || peice == 3)
  				col_num++;
  			else if (peice == -1 || peice == -3)
- 				col_num--;
- 			composition += col_num*col_num*col_num;
+ 				col_num-=2;
+ 			composition += pow(col_num,3);
 
  			col += influence_table[i][j];;
  		}
@@ -358,8 +407,8 @@ int eval(gamestate* game) ///// check and tune
  			col_influence -= 2*inf*col;
  	}
  
- 	return (8*flatcount + 2*centre_control + 3*stack_color + 3*total_influence + 4*row_influence + 4*col_influence + wall_dis + 0.75*composition);
- 	// return (16*flatcount + 5*centre_control + 2.2*stack_color + 1.9*total_influence + 5*row_influence + 5*col_influence + 0.3*wall_dis + 0.5*composition);
+ 	// return (8*flatcount + 2*centre_control + 3*stack_color + 3*total_influence + 4*row_influence + 4*col_influence + wall_dis + 0.75*composition);
+ 	return (15*flatcount + 6*centre_control + 3*stack_color + 5.5*total_influence + 3*row_influence + 3*col_influence + wall_dis + 1*composition);
 }
 
 bool myComparison(const pair<string,int> &a,const pair<string,int> &b)
@@ -432,8 +481,12 @@ int dlimit = 6;
 int rem_moves;
 double aim;
 
+
 pair<int,string> ids(gamestate* game)
 {
+
+	static int n = game->n;
+
 	ttable.clear();
 	// myflatcap.clear();
 	// mystack.clear();
@@ -453,13 +506,13 @@ pair<int,string> ids(gamestate* game)
 	
 	// if (count<3) dlimit = 3; else dlimit = 6;
 	rem_moves = 1.5*std::min(game->myFlatstones,game->otherFlatstones) + 3;
-	aim = 1000 + remaining_time/rem_moves;
-	if (std::min(game->myFlatstones,game->otherFlatstones) < 5)
-	{
+	aim = bonus + remaining_time/rem_moves;
+	if (remaining_time <= cutoff_bonus)
+		aim -= bonus;
+
+	if (std::min(game->myFlatstones,game->otherFlatstones) < n)
 		fc = 150;
-		if (remaining_time < 15000)
-			aim -= 1000;
-	}
+
 	cerr<<"aim: "<<aim/1000<<endl;
 	// auto present = std::chrono::system_clock::now();
 	// remaining_time -= std::chrono::duration_cast<std::chrono::milliseconds>(present - start_time).count();
