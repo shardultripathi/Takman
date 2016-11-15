@@ -31,6 +31,9 @@ class gamestate
 	bool dfs(int, int, int, int);
 	bool road(int);
 	int over(bool);
+	void assign(gamestate*);
+	void checkEqual(gamestate*);
 	void print_board();
+	// inline uint64_t getHash();
 	inline uint64_t getHash() { return hash; };
 };

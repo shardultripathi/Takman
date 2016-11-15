@@ -8,6 +8,7 @@ void place_new(vector<string> &moves, gamestate* game, int player, bool isGetFla
 {
 	// vector<string> &moves = *v;
 	// gamestate &game = *g;
+	// moves.clear();
 	int n = game->n;
 	int i,j;
 	string str;
@@ -32,13 +33,15 @@ void place_new(vector<string> &moves, gamestate* game, int player, bool isGetFla
 					}
 				}
 			}
-		}	
+		}
+
+
+		
 
 
 	} 
 
 	else {
-
 
 		for(i=0;i<n;i++) {
 			for(j=0;j<n;j++) {

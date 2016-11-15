@@ -4,7 +4,7 @@
 
 using namespace std;
 
-int visited[5][5];
+int visited[7][7];
 
 gamestate::gamestate(int N, int time, int player)
 {
@@ -69,7 +69,7 @@ gamestate::gamestate(int N, int time, int player)
 	}
 }
 
-void gamestate::update_board(string move, int player) //////// make changes for zobrist key
+void gamestate::update_board(string move, int player) //////// does it depend on 5????
 {
 
 	int i,j,z;
@@ -213,7 +213,7 @@ void gamestate::update_board(string move, int player) //////// make changes for 
 }
 
 
-void gamestate::undo_move(string move, int player) //////// make changes for zobrist key
+void gamestate::undo_move(string move, int player) //////// does it depend on 5????
 {
 	
 	int i,j,z;
@@ -238,7 +238,7 @@ void gamestate::undo_move(string move, int player) //////// make changes for zob
 		j = move[2] - '1';
 		height[i][j] += stack_size;
 		switch(move[3]) {
-			case '>': for(it=move.length()-1;it>=4;it--) {
+			case '>': for(it=move.length()-1;it>=4;it--) { //////////// are these 4 correct??????????
 				 	  	step = move[it] - '0';
 				 		it2 = step;
 						while(it2>0) {
@@ -438,6 +438,46 @@ int gamestate::over(bool maxNode) ////////// make changes
 	return 3;
 }
 
+void gamestate::assign(gamestate *game1) 
+{
+	int i,j,k;
+	for(i=0;i<n;i++) 
+	{
+		for(j=0;j<n;j++) 
+		{
+			height[i][j] = game1->height[i][j];
+			for(k=0;k<height[i][j];k++) 
+			{
+				board[i][j][k] = game1->board[i][j][k];
+			}
+		}
+	}
+}
+
+void gamestate::checkEqual(gamestate *game1) 
+{
+	int i,j,k;
+	for(i=0;i<n;i++) 
+	{
+		for(j=0;j<n;j++) 
+		{
+			if(height[i][j]!=game1->height[i][j]) 
+			{
+				cerr<<"height"<<(char)(i+'a')<<(j+1)<<endl;
+				return;
+			}
+			for(k=0;k<height[i][j];k++) 
+			{
+				if(board[i][j][k]!=game1->board[i][j][k]) 
+				{
+					cerr<<"piece"<<endl;
+					return;
+				}
+			}
+		}
+	}
+}
+
 void gamestate::print_board() {
 	int i,j,k;
 	for(j=n-1;j>=0;j--) {
@@ -471,7 +511,7 @@ void gamestate::print_board() {
 
 // inline uint64_t gamestate::getHash()
 // {
-// 	// hash2 = 0;
+// 	// uint64_t hash2 = 0;
 // 	// int z = 0;
 // 	// for (int i=0; i<n; i++)
 // 	// {
@@ -498,7 +538,7 @@ void gamestate::print_board() {
 // 	// 	cerr<<"FALSE!!!!!!!!!!"<<endl;
 // 	// 	exit(0);
 // 	// } 
-// 	// // else
-// 	// // cerr<<"TRUE!!!!!!!!!!"<<endl;
+// 	// else
+// 	// cerr<<"TRUE!!!!!!!!!!"<<endl;
 // 	return hash;
 // }

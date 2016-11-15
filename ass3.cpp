@@ -48,8 +48,7 @@ int main() {
 	int a = rand()%n;
 	int b = rand()%n;
 	
-
-	
+	update_start_time(tl*1.0);
 
 	/////////////////////////////////////////
 	
@@ -59,11 +58,13 @@ int main() {
 		str = "F";
 		str += c;
 		str += to_string(b+1);
-		cerr<<str<<endl;
+		str = "Fa5";
+		// cerr<<str<<endl;
 		
-		// str = "Fa1";
+		// str = "Fc4";
 		cout<<str<<endl;
 		game->update_board(str,2);
+		game->print_board();
 
 		getline(cin,str);
 		game->update_board(str,1);
@@ -73,11 +74,13 @@ int main() {
 			
 		cout<<str<<endl;
 		game->update_board(str,player_id);
+		game->print_board();
 	} 
 	else 
 	{
 		getline(cin,str);
 		game->update_board(str,2);
+		game->print_board();
 		// if (game->height[a][b]==0)
 		// 	str = "Fa1";
 		// else
@@ -94,6 +97,7 @@ int main() {
 		cerr<<str<<endl;
 		cout<<str<<endl;
 		game->update_board(str,1);
+		game->print_board();
 	}
 
 	int opp = (player_id==1)?2:1; 
@@ -103,6 +107,7 @@ int main() {
 
 		getline(cin,str); count++;
 		game->update_board(str,opp);
+		game->print_board();
 
 		t = ids(game);
 		// SearchData data = ids(game);
@@ -110,6 +115,7 @@ int main() {
 		str = t.second;
 		cout<<str<<endl;
 		game->update_board(str,player_id);
+		game->print_board();
 	}
 
 	// {"e1", "a5", "Fb5", "Cb4", "Fa2", "Fe3", "Fa3", "Fa4", "Fc4", "Fc5", "Fd5", "Fd4", "Fe5", "1b4>1", "1a5-1", "Fe2", "1b5>1", "2c4+2", "Ca5"}
